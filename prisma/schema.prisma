@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model cafe_table {
+  id                                Int                                 @id @default(autoincrement())
+  capacity                          Int
+  nr                                Int                                 @unique
+  tables_in_orders_and_reservations tables_in_orders_and_reservations[]
+}
+
+model menu_item {
+  id              Int             @id @default(autoincrement())
+  name            String          @db.VarChar
+  price_in_kr     Float
+  description     String?         @db.VarChar
+  type_id         Int
+  order_item_type order_item_type @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_items     order_items[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model order {
+  id                                Int                                 @id @default(autoincrement())
+  waiter_id                         Int
+  created_at                        DateTime                            @default(now()) @db.Timestamptz(6)
+  updated_at                        DateTime                            @default(now()) @db.Timestamptz(6)
+  comment                           String?                             @db.VarChar
+  status                            String                              @db.VarChar
+  total_price_in_kr                 Decimal                             @db.Decimal
+  personel                          personel                            @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_items                       order_items[]
+  tables_in_orders_and_reservations tables_in_orders_and_reservations[]
+}
+
+model order_item_type {
+  id        Int         @id @default(autoincrement())
+  name      String      @db.VarChar
+  menu_item menu_item[]
+}
+
+model order_items {
+  id           Int       @id @default(autoincrement())
+  order_id     Int
+  menu_item_id Int
+  menu_item    menu_item @relation(fields: [menu_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order        order     @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model personel {
+  id             Int              @id @default(autoincrement())
+  first_name     String           @db.VarChar
+  last_name      String           @db.VarChar
+  phone_number   String           @db.VarChar
+  email          String           @unique @db.VarChar
+  role_id        Int
+  password       String           @db.VarChar
+  order          order[]
+  role           role             @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  refresh_tokens refresh_tokens[]
+  reservation    reservation[]
+}
+
+model reservation {
+  id                                Int                                 @id @default(autoincrement())
+  time                              DateTime                            @db.Timestamptz(6)
+  duration_in_minutes               Int
+  number_of_people                  Int
+  waiter_id                         Int?
+  status                            String                              @db.VarChar
+  comment                           String?                             @db.VarChar
+  customer_name                     String                              @db.VarChar
+  customer_phone_number             String                              @db.VarChar
+  personel                          personel?                           @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tables_in_orders_and_reservations tables_in_orders_and_reservations[]
+}
+
+model role {
+  id       Int        @id @default(autoincrement())
+  name     String     @db.VarChar
+  personel personel[]
+}
+
+model tables_in_orders_and_reservations {
+  id             Int          @id @default(autoincrement())
+  order_id       Int?
+  reservation_id Int?
+  table_id       Int?
+  order          order?       @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reservation    reservation? @relation(fields: [reservation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cafe_table     cafe_table?  @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model refresh_tokens {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token      String   @unique
+  issued_at  DateTime @default(now()) @db.Timestamptz(6)
+  expires_at DateTime @db.Timestamptz(6)
+  is_revoked Boolean  @default(false)
+  personel   personel @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}

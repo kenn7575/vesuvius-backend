@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
+const bcrypt = require("bcrypt");
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+const users = []; // Temporary user storage. Replace with a database in production.
 
 function generateAccessToken(user) {
   return jwt.sign(user, process.env.JWT_SECRET, {

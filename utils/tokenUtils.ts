@@ -7,8 +7,9 @@ export function generateAccessToken(user: personel) {
   if (!config.jwtSecret) {
     throw new Error("JWT secret not set");
   }
-  console.log("Why?", user);
-  return jwt.sign(user, config.jwtSecret, {
+  const { password, ...userWithoutPassword } = user;
+
+  return jwt.sign(userWithoutPassword, config.jwtSecret, {
     algorithm: "HS256",
     expiresIn: config.accessTokenExpiration,
     subject: user.id.toString(),
@@ -19,7 +20,11 @@ export function generateRefreshToken(user: personel) {
   if (!config.jwtSecret) {
     throw new Error("JWT secret not set");
   }
-  return jwt.sign(user, config.jwtSecret, {
+
+  //remove password from user object
+  const { password, ...userWithoutPassword } = user;
+
+  return jwt.sign(userWithoutPassword, config.jwtSecret, {
     algorithm: "HS256",
     expiresIn: config.refreshTokenExpiration,
     subject: user.id.toString(),

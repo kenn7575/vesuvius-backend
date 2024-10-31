@@ -11,6 +11,7 @@ export function authenticateToken(
 ): void | any {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
+  console.log("Token", token);
   if (!token) return res.sendStatus(401);
 
   if (!config.jwtSecret) {
@@ -18,7 +19,10 @@ export function authenticateToken(
   }
 
   jwt.verify(token, config.jwtSecret, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      console.log("Token verification failed", err);
+      return res.sendStatus(403);
+    }
     // req.user = user as personel;
     next();
   });

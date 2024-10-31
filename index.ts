@@ -3,12 +3,14 @@ import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import limiter from "./utils/rateLimiter";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+app.use("/auth/*", limiter);
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 

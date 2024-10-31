@@ -86,24 +86,63 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
 }
 
 // Refresh token function to issue a new access token
-export function refreshToken(req: Request, res: Response): void | any {
+export async function refreshToken(
+  req: Request,
+  res: Response
+): Promise<void | any> {
+  // Get the refresh token from the request
   const { token } = req.body;
 
+  // Check if the refresh token is present and the server has a JWT secret
   if (!token) return res.sendStatus(401);
   if (!config.jwtSecret) {
     throw new Error("JWT secret not set");
   }
 
   // Check if the refresh token is valid in the database
+  // try {
+  //   const tokenFromDatabase = await prisma.refresh_tokens.findUnique({
+  //     where: {
+  //       token: token,
+  //     },
+  //   });
+
+  //   if (!tokenFromDatabase) {
+  //     // If the token is not found in the database, return a 403 status
+  //     return res.sendStatus(403);
+  //   }
+  // } catch (error) {
+
+  //   return res.sendStatus(403);
+  // }
 
   // Verify the refresh token
-  jwt.verify(token, config.jwtSecret, (err: any, data: any) => {
-    if (err) return res.sendStatus(403);
+  try {
+    jwt.verify(token, config.jwtSecret, async (err: any, data: any) => {
+      if (err) {
+        console.log("Token verification failed", err);
+        return res.sendStatus(403);
+      }
+      console.log("Data", data);
+      // Fetch latest user data from the database
+      const user = await prisma.personel.findUnique({
+        where: {
+          id: data.id,
+        },
+      });
+      if (!user) {
+        console.log("User not found");
+        return res.status(403);
+      }
 
-    const user = data as personel;
+      // Generate a new access token
+      const accessToken = generateAccessToken(user);
 
-    // Generate a new access token
-    const accessToken = generateAccessToken(user);
-    res.json({ accessToken });
-  });
+      res.json({ accessToken });
+    });
+  } catch (error) {
+    // if anything goes wrong, return a 403 status
+    console.log("Error", error);
+    res.sendStatus(403);
+  }
 }

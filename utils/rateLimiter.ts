@@ -2,13 +2,7 @@ import RateLimit from "express-rate-limit";
 import { PostgresStore } from "@acpr/rate-limit-postgresql";
 
 import config from "../config/config";
-console.log("postgresStore", {
-  user: config.DbUser,
-  password: config.DbPassword,
-  host: config.DbHost,
-  database: config.DbRateLimitName,
-  port: config.DbPort,
-});
+
 const postgresStore = new PostgresStore(
   {
     user: config.DbUser,

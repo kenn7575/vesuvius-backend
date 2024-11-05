@@ -20,6 +20,8 @@ model menu_item {
   price_in_kr     Float
   description     String?         @db.VarChar
   type_id         Int
+  created_at      DateTime        @default(now()) @db.Timetz(6)
+  updated_at      DateTime        @default(now()) @db.Timetz(6)
   order_item_type order_item_type @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items     order_items[]
 }
@@ -39,9 +41,11 @@ model order {
 }
 
 model order_item_type {
-  id        Int         @id @default(autoincrement())
-  name      String      @db.VarChar
-  menu_item menu_item[]
+  id         Int         @id @default(autoincrement())
+  name       String      @db.VarChar
+  created_at DateTime    @default(now()) @db.Timetz(6)
+  updated_at DateTime    @default(now()) @db.Timetz(6)
+  menu_item  menu_item[]
 }
 
 model order_items {
@@ -54,16 +58,18 @@ model order_items {
 }
 
 model personel {
-  id             Int              @id @default(autoincrement())
-  first_name     String           @db.VarChar
-  last_name      String           @db.VarChar
-  phone_number   String           @db.VarChar
-  email          String           @unique @db.VarChar
+  id             Int             @id @default(autoincrement())
+  first_name     String          @db.VarChar
+  last_name      String          @db.VarChar
+  phone_number   String          @db.VarChar
+  email          String          @unique @db.VarChar
   role_id        Int
-  password       String           @db.VarChar
+  password       String          @db.VarChar
+  created_at     DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime        @default(now()) @db.Timetz(6)
   order          order[]
-  role           role             @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  refresh_tokens refresh_tokens[]
+  role           role            @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  refresh_tokens refresh_tokens?
   reservation    reservation[]
 }
 
@@ -77,14 +83,18 @@ model reservation {
   comment                           String?                             @db.VarChar
   customer_name                     String                              @db.VarChar
   customer_phone_number             String                              @db.VarChar
+  created_at                        DateTime                            @default(now()) @db.Timetz(6)
+  updated_at                        DateTime                            @default(now()) @db.Timetz(6)
   personel                          personel?                           @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tables_in_orders_and_reservations tables_in_orders_and_reservations[]
 }
 
 model role {
-  id       Int        @id @default(autoincrement())
-  name     String     @db.VarChar
-  personel personel[]
+  id         Int        @id @default(autoincrement())
+  name       String     @db.VarChar
+  created_at DateTime   @default(now()) @db.Timetz(6)
+  updated_at DateTime   @default(now()) @db.Timetz(6)
+  personel   personel[]
 }
 
 model tables_in_orders_and_reservations {
@@ -92,17 +102,16 @@ model tables_in_orders_and_reservations {
   order_id       Int?
   reservation_id Int?
   table_id       Int?
+  created_at     DateTime     @default(now()) @db.Timetz(6)
+  updated_at     DateTime     @default(now()) @db.Timetz(6)
   order          order?       @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   reservation    reservation? @relation(fields: [reservation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cafe_table     cafe_table?  @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model refresh_tokens {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
-  token      String   @unique
-  issued_at  DateTime @default(now()) @db.Timestamptz(6)
-  expires_at DateTime @db.Timestamptz(6)
-  is_revoked Boolean  @default(false)
-  personel   personel @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id       Int      @id @default(autoincrement())
+  user_id  Int      @unique
+  token    String   @unique
+  personel personel @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

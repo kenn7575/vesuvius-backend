@@ -8,13 +8,18 @@ const prisma = new PrismaClient();
 // use `prisma` in your application to read and write data in your DB
 
 import bcrypt from "bcrypt";
-import { generateAccessToken, generateRefreshToken } from "../utils/tokenUtils";
+
 import config from "../config/config";
+import { RefreshTokenRepositoryImpl } from "../core/auth/refreshTokenRepositoryImpl";
+import { TokenService } from "../core/auth/tokenService";
 
 // Sign-up function to register a new user
 export async function signup(req: Request, res: Response): Promise<void | any> {
   const { email, password, firstName, lastName, phoneNumber, roleId } =
     req.body;
+  if (!config.jwtSecret) {
+    throw new Error("JWT secret not set");
+  }
 
   const inputData: Omit<personel, "id"> = {
     email,
@@ -23,6 +28,8 @@ export async function signup(req: Request, res: Response): Promise<void | any> {
     last_name: lastName,
     phone_number: phoneNumber,
     role_id: roleId,
+    created_at: new Date(),
+    updated_at: new Date(),
   };
 
   try {
@@ -33,32 +40,44 @@ export async function signup(req: Request, res: Response): Promise<void | any> {
     else return res.status(500).json({ message: "Internal server error" });
   }
 
-  // Check if the user already exists
-  const existingUser = await prisma.personel.findUnique({
-    where: {
-      email: email,
-    },
-  });
-  if (existingUser) {
-    return res.status(409).json({ message: "Username already exists" });
+  try {
+    // Check if the user already exists
+    const existingUser = await prisma.personel.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (existingUser) {
+      return res.status(409).json({ message: "Username already exists" });
+    }
+
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(
+      password,
+      Number(config.saltRounds)
+    );
+    inputData.password = hashedPassword;
+
+    // Create and store the new user
+    await prisma.personel.create({
+      data: inputData,
+    });
+
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error("Error", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  // Hash the password before storing it
-  const hashedPassword = await bcrypt.hash(password, Number(config.saltRounds));
-  inputData.password = hashedPassword;
-
-  // Create and store the new user
-
-  await prisma.personel.create({
-    data: inputData,
-  });
-
-  res.status(201).json({ message: "User registered successfully" });
 }
 
 // Sign-in function to authenticate a user and issue tokens
 export async function signin(req: Request, res: Response): Promise<void | any> {
   const { email, password } = req.body;
+  const audience = req.headers["audience"] as string;
+  if (!audience) return res.sendStatus(401);
+  if (!config.jwtSecret) {
+    throw new Error("JWT secret not set");
+  }
 
   // Find the user by username
   const user = await prisma.personel.findUnique({
@@ -77,12 +96,15 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   }
 
   // Generate access and refresh tokens
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  const refreshTokenRepository = new RefreshTokenRepositoryImpl(prisma);
+  const tokenService = new TokenService(refreshTokenRepository);
+  const accessToken = tokenService.generateAccessToken(user, audience);
+  const refreshToken = tokenService.generateRefreshToken(user, audience);
 
   // Store the refresh token in the database
+  const { password: _, ...userWithoutPassword } = user;
 
-  res.json({ accessToken, refreshToken });
+  res.json({ accessToken, refreshToken, userWithoutPassword });
 }
 
 // Refresh token function to issue a new access token
@@ -90,59 +112,50 @@ export async function refreshToken(
   req: Request,
   res: Response
 ): Promise<void | any> {
-  // Get the refresh token from the request
-  const { token } = req.body;
+  // steps:
+  // 1. get the refresh token and audience from the request
+  // 2. validate the refresh token
+  // 3. fetch user data from the database
+  // 4. generate a new access token
 
-  // Check if the refresh token is present and the server has a JWT secret
-  if (!token) return res.sendStatus(401);
+  // 1. get the refresh token and audience from the request
+  const { token: encryptedToken } = req.body;
+  const audience = req.headers["audience"] as string;
+  if (!encryptedToken || !audience) return res.sendStatus(401);
   if (!config.jwtSecret) {
     throw new Error("JWT secret not set");
   }
 
-  // Check if the refresh token is valid in the database
-  // try {
-  //   const tokenFromDatabase = await prisma.refresh_tokens.findUnique({
-  //     where: {
-  //       token: token,
-  //     },
-  //   });
-
-  //   if (!tokenFromDatabase) {
-  //     // If the token is not found in the database, return a 403 status
-  //     return res.sendStatus(403);
-  //   }
-  // } catch (error) {
-
-  //   return res.sendStatus(403);
-  // }
-
-  // Verify the refresh token
+  // 2. validate the refresh token
+  const refreshTokenRepository = new RefreshTokenRepositoryImpl(prisma);
+  const tokenService = new TokenService(refreshTokenRepository);
   try {
-    jwt.verify(token, config.jwtSecret, async (err: any, data: any) => {
-      if (err) {
-        console.log("Token verification failed", err);
-        return res.sendStatus(403);
-      }
-      console.log("Data", data);
-      // Fetch latest user data from the database
-      const user = await prisma.personel.findUnique({
-        where: {
-          id: data.id,
-        },
-      });
-      if (!user) {
-        console.log("User not found");
-        return res.status(403);
-      }
-
-      // Generate a new access token
-      const accessToken = generateAccessToken(user);
-
-      res.json({ accessToken });
+    const token = await tokenService.validateRefreshToken(
+      encryptedToken,
+      audience
+    );
+    if (!token || !token.sub) {
+      console.error("Invalid token");
+      return res.sendStatus(403);
+    }
+    // 3. fetch user data from the database
+    const user = await prisma.personel.findUnique({
+      where: {
+        id: Number(token?.sub),
+      },
     });
+    if (!user) {
+      console.error("User not found");
+      return res.status(403);
+    }
+
+    // Generate a new access token
+    const accessToken = tokenService.generateAccessToken(user, audience);
+
+    res.json({ accessToken });
   } catch (error) {
     // if anything goes wrong, return a 403 status
-    console.log("Error", error);
+    console.error("Error", error);
     res.sendStatus(403);
   }
 }

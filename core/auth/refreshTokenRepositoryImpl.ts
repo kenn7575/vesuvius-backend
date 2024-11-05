@@ -12,7 +12,7 @@ export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
 
   async saveRefreshToken(userId: number, token: string): Promise<void> {
     await this.prisma.refresh_tokens.upsert({
-      where: { id: Number(userId) },
+      where: { user_id: Number(userId) },
       update: { token },
       create: { user_id: userId, token },
     });

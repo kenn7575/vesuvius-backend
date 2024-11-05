@@ -98,8 +98,8 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   // Generate access and refresh tokens
   const refreshTokenRepository = new RefreshTokenRepositoryImpl(prisma);
   const tokenService = new TokenService(refreshTokenRepository);
-  const accessToken = tokenService.generateAccessToken(user, audience);
-  const refreshToken = tokenService.generateRefreshToken(user, audience);
+  const accessToken = await tokenService.generateAccessToken(user, audience);
+  const refreshToken = await tokenService.generateRefreshToken(user, audience);
 
   // Store the refresh token in the database
   const { password: _, ...userWithoutPassword } = user;

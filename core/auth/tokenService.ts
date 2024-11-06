@@ -31,13 +31,13 @@ export class TokenService {
       algorithm: "HS256",
       expiresIn: this.config.accessTokenExpiration,
       subject: user.id.toString(),
-      audience,
+      // the audience is encrypted to prevent hackers from copying it and use it to gain access
+      audience: await this.encryptString(audience),
     });
 
     // encrypt token;
-    const encryptedToken = await this.encryptToken(token);
 
-    return encryptedToken;
+    return token;
   }
 
   async generateRefreshToken(
@@ -58,7 +58,7 @@ export class TokenService {
     });
 
     // encrypt token
-    const encryptedToken = await this.encryptToken(token);
+    const encryptedToken = await this.encryptString(token);
 
     // create in database
     this.saveRefreshToken(user.id, encryptedToken);
@@ -79,7 +79,7 @@ export class TokenService {
   }
 
   async validateAccessToken(
-    encryptedToken: string,
+    token: string,
     audience: string
   ): Promise<jwt.JwtPayload | null> {
     // steps:
@@ -89,23 +89,24 @@ export class TokenService {
 
     try {
       // 1. decrypt token
-      const decryptedToken = await this.decryptToken(encryptedToken);
 
       // 2. basic validation of token
       if (!this.config.jwtSecret) {
         throw new Error("JWT secret not set");
       }
-      const token = jwt.verify(
-        decryptedToken,
+      const tokenPayload = jwt.verify(
+        token,
         this.config.jwtSecret
       ) as jwt.JwtPayload;
 
+      tokenPayload.aud = await this.decryptString(tokenPayload.aud as string);
+
       // 3. compare audience
-      if (token.aud !== audience) {
+      if (tokenPayload.aud !== audience) {
         throw new Error("Invalid audience");
       }
 
-      return token;
+      return tokenPayload;
     } catch (error) {
       console.error("Invalid token", (typeof error).toString(), error);
       return null;
@@ -125,7 +126,7 @@ export class TokenService {
 
     try {
       // 1. decrypt token
-      const decryptedToken = await this.decryptToken(encryptedToken);
+      const decryptedToken = await this.decryptString(encryptedToken);
 
       // 2. basic validation of token
       if (!this.config.jwtSecret) {
@@ -158,7 +159,7 @@ export class TokenService {
     }
   }
 
-  private async encryptToken(token: string): Promise<string> {
+  private async encryptString(token: string): Promise<string> {
     if (!this.config.encryptionKey) {
       throw new Error("Encryption key not set");
     }
@@ -177,7 +178,8 @@ export class TokenService {
     return `${iv.toString("base64")}:${encrypted}`;
   }
 
-  private async decryptToken(encryptedToken: string): Promise<string> {
+  private async decryptString(encryptedToken: string): Promise<string> {
+    console.log("decryptString", encryptedToken);
     if (!this.config.encryptionKey) {
       throw new Error("Encryption key not set");
     }

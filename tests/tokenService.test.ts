@@ -206,16 +206,18 @@ describe("TokenService", () => {
   describe("encryptToken and decryptToken", () => {
     it("should encrypt and decrypt a token successfully", async () => {
       const token = "testToken";
-      const encryptedToken = await tokenService["encryptToken"](token);
+      const encryptedToken = await tokenService["decryptString"](token);
       expect(encryptedToken).toBeDefined();
 
-      const decryptedToken = await tokenService["decryptToken"](encryptedToken);
+      const decryptedToken = await tokenService["decryptString"](
+        encryptedToken
+      );
       expect(decryptedToken).toBe(token);
     });
 
     it("should throw an error for invalid encrypted token format", async () => {
       await expect(
-        tokenService["decryptToken"]("invalidTokenFormat")
+        tokenService["decryptString"]("invalidTokenFormat")
       ).rejects.toThrow("Invalid encrypted token format");
     });
   });

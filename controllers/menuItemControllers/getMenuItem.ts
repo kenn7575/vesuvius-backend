@@ -1,22 +1,25 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-const app = express();
 const prisma = new PrismaClient();
 
-app.patch("/menu_items/:id", async (req: Request, res: Response) => {
+export async function getAllMenuItems(
+  req: Request,
+  res: Response
+): Promise<void | any> {
   const { id } = req.params;
 
-  const { name, description, price_in_kr, type_id } = req.body;
+  // TODO: Add validation for the request body
 
   try {
-    const updatedMenuItem = await prisma.menu_item.update({
+    const menuItems = await prisma.menu_item.findUnique({
       where: { id: parseInt(id) },
-      data: { name, description, price_in_kr, type_id },
     });
-    res.json(updatedMenuItem);
+    res.json(menuItems);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
-});
+}
+
+export default getAllMenuItems;

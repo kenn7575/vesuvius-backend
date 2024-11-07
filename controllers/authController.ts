@@ -83,6 +83,8 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
     throw new Error("JWT secret not set");
   }
 
+  // TODO: Add validation for email and password
+
   // Find the user by email
   const user = await prisma.personel.findUnique({
     where: {

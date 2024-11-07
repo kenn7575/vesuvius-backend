@@ -1,13 +1,15 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-const app = express();
 const prisma = new PrismaClient();
 
-app.use(express.json());
-
-app.post("/menu_items", async (req: Request, res: Response) => {
+export async function createMenuItem(
+  req: Request,
+  res: Response
+): Promise<void | any> {
   const { name, description, price_in_kr, type_id } = req.body;
+
+  // TODO: Add validation for the request body and access control
 
   try {
     const menuItem = await prisma.menu_item.create({
@@ -15,14 +17,14 @@ app.post("/menu_items", async (req: Request, res: Response) => {
         name,
         description,
         price_in_kr,
-        type_id
-      }
+        type_id,
+      },
     });
     res.status(201).json(menuItem);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
-});
+}
 
-export default app;
+export default createMenuItem;

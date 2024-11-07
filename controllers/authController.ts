@@ -74,23 +74,29 @@ export async function signup(req: Request, res: Response): Promise<void | any> {
 export async function signin(req: Request, res: Response): Promise<void | any> {
   const { email, password } = req.body;
   const audience = req.headers["audience"] as string;
-  if (!audience) return res.sendStatus(400);
+
+  if (!audience) {
+    return res.status(400).json({ message: "Audience header is required" });
+  }
+
   if (!config.jwtSecret) {
     throw new Error("JWT secret not set");
   }
 
-  // Find the user by username
+  // Find the user by email
   const user = await prisma.personel.findUnique({
     where: {
       email: email,
     },
   });
+
   if (!user) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
 
   // Verify the password
   const isPasswordValid = await bcrypt.compare(password, user.password);
+
   if (!isPasswordValid) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
@@ -104,7 +110,9 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   // Store the refresh token in the database
   const { password: _, ...userWithoutPassword } = user;
 
-  res.json({ accessToken, refreshToken, userWithoutPassword });
+  res
+    .status(200)
+    .json({ accessToken, refreshToken, user: userWithoutPassword });
 }
 
 // Refresh token function to issue a new access token
@@ -121,10 +129,14 @@ export async function refreshToken(
   // 1. get the refresh token and audience from the request
   const { token: encryptedToken } = req.body;
   const audience = req.headers["audience"] as string;
-  if (!encryptedToken || !audience)
-    return res.sendStatus(400).json({
+
+  if (!encryptedToken || !audience) {
+    console.error("Invalid request. Missing token or audience in headers.");
+    return res.status(400).json({
       message: "Invalid request. Missing token or audience in headers.",
     });
+  }
+
   if (!config.jwtSecret) {
     throw new Error("JWT secret not set");
   }
@@ -137,30 +149,36 @@ export async function refreshToken(
       encryptedToken,
       audience
     );
+
     if (!token || !token.sub) {
       console.error("Invalid token");
       return res
-        .sendStatus(401)
+        .status(401)
         .json({ message: "Invalid request. Token is invalid." });
     }
+
     // 3. fetch user data from the database
     const user = await prisma.personel.findUnique({
       where: {
-        id: Number(token?.sub),
+        id: Number(token.sub),
       },
     });
+
     if (!user) {
       console.error("User not found");
-      return res.status(401);
+      return res
+        .status(401)
+        .json({ message: "Invalid request. User not found." });
     }
 
-    // Generate a new access token
-    const accessToken = tokenService.generateAccessToken(user, audience);
+    // 4. Generate a new access token
+    const accessToken = await tokenService.generateAccessToken(user, audience);
+    console.log("Access token generated successfully");
 
-    res.json({ accessToken });
+    res.status(200).json({ accessToken });
   } catch (error) {
-    // if anything goes wrong, return a 403 status
+    // if anything goes wrong, return a 401 status
     console.error("Error", error);
-    res.sendStatus(401).json({ message: "Something unexpected happend." });
+    res.status(401).json({ message: "Something unexpected happened." });
   }
 }

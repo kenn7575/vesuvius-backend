@@ -10,7 +10,8 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use("/auth/*", limiter);
+app.use("/auth/signin", limiter);
+app.use("/auth/signup", limiter);
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 

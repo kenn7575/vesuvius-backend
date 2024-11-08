@@ -38,13 +38,13 @@ export async function authenticateToken(
   const refreshTokenRepository = new RefreshTokenRepositoryImpl(prisma);
   const tokenService = new TokenService(refreshTokenRepository);
 
-  const isValid = await tokenService.validateAccessToken(token, audience);
+  const tokenPayload = await tokenService.validateAccessToken(token, audience);
 
-  if (!isValid) {
+  if (!tokenPayload) {
     return res.sendStatus(403);
   }
 
-  res.locals.userId = isValid.sub;
+  res.locals.userId = tokenPayload.sub;
 
   next();
 }

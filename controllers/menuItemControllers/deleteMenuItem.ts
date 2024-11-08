@@ -1,13 +1,15 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-const app = express();
 const prisma = new PrismaClient();
 
-app.use(express.json());
-
-app.delete("/order-items/:id", async (req: Request, res: Response) => {
+export async function deleteMenuItem(
+  req: Request,
+  res: Response
+): Promise<void | any> {
   const { id } = req.params;
+
+  // TODO: Add validation for the request body and access control
 
   try {
     const orderItem = await prisma.order_items.delete({
@@ -19,6 +21,6 @@ app.delete("/order-items/:id", async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
-});
+}
 
-export default app;
+export default deleteMenuItem;

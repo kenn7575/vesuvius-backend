@@ -18,20 +18,20 @@ interface CreateOrderRequest {
 app.post(
   "/orders",
   async (req: Request<{}, {}, CreateOrderRequest>, res: Response) => {
-  req.user
+    req.user;
     const { comment, status, waiterId, orderItems } = req.body;
 
     try {
       const newOrder = await prisma.order.create({
         data: {
           comment,
-          status, 
+          status,
           waiter_id: waiterId,
           order_items: {
             create: orderItems.map((item) => ({
               count: item.count,
               menu_item_id: item.menu_item_id,
-              price: item.price,
+              price: item.price_in_oere,
             })),
           },
         },
@@ -44,10 +44,3 @@ app.post(
     }
   }
 );
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});

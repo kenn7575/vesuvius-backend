@@ -179,7 +179,6 @@ export class TokenService {
   }
 
   private async decryptString(encryptedToken: string): Promise<string> {
-    console.log("decryptString", encryptedToken);
     if (!this.config.encryptionKey) {
       throw new Error("Encryption key not set");
     }

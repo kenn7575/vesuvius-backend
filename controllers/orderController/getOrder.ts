@@ -24,7 +24,7 @@ app.get("/orders", async (req: Request, res: Response) => {
           select: {
             id: true,
             count: true,
-            price: true,
+            price_in_oere: true,
             order_id: true,
             menu_item_id: true,
           },
@@ -38,10 +38,4 @@ app.get("/orders", async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
-});
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });

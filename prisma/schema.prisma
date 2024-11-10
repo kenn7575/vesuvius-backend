@@ -22,6 +22,7 @@ model menu_item {
   type_id         Int
   created_at      DateTime        @default(now()) @db.Timetz(6)
   updated_at      DateTime        @default(now()) @db.Timetz(6)
+  is_active       Boolean         @default(true)
   order_item_type order_item_type @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items     order_items[]
 }
@@ -34,7 +35,6 @@ model order {
   updated_at                        DateTime                            @default(now()) @db.Timestamptz(6)
   comment                           String?                             @db.VarChar
   status                            String                              @db.VarChar
-  total_price_in_kr                 Decimal                             @db.Decimal
   personel                          personel                            @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items                       order_items[]
   tables_in_orders_and_reservations tables_in_orders_and_reservations[]
@@ -49,12 +49,14 @@ model order_item_type {
 }
 
 model order_items {
-  id           Int       @id @default(autoincrement())
-  order_id     Int
-  menu_item_id Int
-  count        Int       @default(1)
-  menu_item    menu_item @relation(fields: [menu_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  order        order     @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id            Int       @id @default(autoincrement())
+  order_id      Int
+  menu_item_id  Int
+  count         Int       @default(1)
+  comment       String?
+  price_in_oere Int       @default(0)
+  menu_item     menu_item @relation(fields: [menu_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order         order     @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model personel {

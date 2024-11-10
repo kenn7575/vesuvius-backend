@@ -142,7 +142,6 @@ describe("TokenService", () => {
           refreshToken,
           "testAudience"
         );
-      console.log("tokenPayload", tokenPayload);
       expect(tokenPayload).toBeTruthy();
 
       expect(tokenPayload?.sub).toBe(mockUser.id.toString());
@@ -167,7 +166,7 @@ describe("TokenService", () => {
           refreshToken,
           "1234"
         );
-      console.log("tokenPayload", tokenPayload);
+
       expect(tokenPayload).toBeNull();
     });
 
@@ -206,7 +205,7 @@ describe("TokenService", () => {
   describe("encryptToken and decryptToken", () => {
     it("should encrypt and decrypt a token successfully", async () => {
       const token = "testToken";
-      const encryptedToken = await tokenService["decryptString"](token);
+      const encryptedToken = await tokenService["encryptString"](token);
       expect(encryptedToken).toBeDefined();
 
       const decryptedToken = await tokenService["decryptString"](

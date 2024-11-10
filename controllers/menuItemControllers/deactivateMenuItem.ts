@@ -4,7 +4,7 @@ import { idSchema } from "../../zodSchemas/createUserSchema";
 
 const prisma = new PrismaClient();
 
-export async function getAllMenuItems(
+export async function deactivateMenuItem(
   req: Request,
   res: Response
 ): Promise<void | any> {
@@ -19,14 +19,16 @@ export async function getAllMenuItems(
   }
 
   try {
-    const menuItems = await prisma.menu_item.findUnique({
+    const orderItem = await prisma.menu_item.update({
       where: { id: validatedId.data },
+      data: { is_active: false },
     });
-    res.json(menuItems);
+
+    res.status(200).json(orderItem);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 }
 
-export default getAllMenuItems;
+export default deactivateMenuItem;

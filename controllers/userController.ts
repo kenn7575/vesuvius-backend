@@ -7,7 +7,7 @@ export async function userData(
   res: Response
 ): Promise<void | any> {
   const userId = res.locals.userId;
-  console.log("userData: ", userId);
+
   if (!userId) {
     return res.status(400).json({ message: "Token not provided." });
   }

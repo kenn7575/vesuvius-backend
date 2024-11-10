@@ -8,13 +8,19 @@ describe("ReservationManager with Time-based Reservations", () => {
   let manager: ReservationManager;
 
   beforeEach(() => {
-    manager = new ReservationManager(
-      [
+    manager = new ReservationManager({
+      Tables: [
         { id: 1, capacity: 2 },
         { id: 2, capacity: 4 },
       ],
-      60 // default reservation duration in minutes
-    );
+      defaultDuration: 60,
+      openingHoursByDate: {
+        "2023-10-01": {
+          openingTime: "10:00",
+          closingTime: "22:00",
+        },
+      },
+    });
   });
 
   test("should check availability considering time and duration", () => {
@@ -57,14 +63,20 @@ describe("ReservationManager checkDayAvailability", () => {
   let manager: ReservationManager;
 
   beforeEach(() => {
-    manager = new ReservationManager(
-      [
+    manager = new ReservationManager({
+      Tables: [
         { id: 1, capacity: 2 },
         { id: 2, capacity: 4 },
         { id: 3, capacity: 2 },
       ],
-      60 // default reservation duration in minutes
-    );
+      defaultDuration: 60,
+      openingHoursByDate: {
+        "2023-10-01": {
+          openingTime: "10:00",
+          closingTime: "22:00",
+        },
+      },
+    });
   });
 
   test("should return Available when there are no reservations", () => {
@@ -89,7 +101,6 @@ describe("ReservationManager checkDayAvailability", () => {
   test("should return Unavailable when all time slots are fully booked", () => {
     const date = new Date("2023-10-01");
     const openingTime = new Date("2023-10-01T10:00:00");
-    const closingTime = new Date("2023-10-01T22:00:00");
 
     // Create reservations that cover the entire operational hours
     manager.addReservation(2, "Morning", openingTime, 720); // 12 hours
@@ -105,17 +116,28 @@ describe("ReservationManager checkAvailabilityInRange", () => {
   let manager: ReservationManager;
 
   beforeEach(() => {
-    manager = new ReservationManager(
-      [
+    manager = new ReservationManager({
+      Tables: [
         { id: 1, capacity: 2 },
         { id: 2, capacity: 4 },
         { id: 3, capacity: 2 },
       ],
-
-      60, // default reservation duration in minutes
-      "14:00",
-      "16:00"
-    );
+      defaultDuration: 60,
+      openingHoursByDate: {
+        "2023-10-01": {
+          openingTime: "10:00",
+          closingTime: "22:00",
+        },
+        "2023-10-02": {
+          openingTime: "10:00",
+          closingTime: "22:00",
+        },
+        "2023-10-03": {
+          openingTime: "10:00",
+          closingTime: "22:00",
+        },
+      },
+    });
   });
 
   test("should return correct availability for a range with no reservations", () => {
@@ -132,31 +154,31 @@ describe("ReservationManager checkAvailabilityInRange", () => {
 
   test("should return correct availability for a range with varying availability", () => {
     // Arrange
-    const startDate = new Date("2040-11-20");
-    const endDate = new Date("2040-11-22");
+    const startDate = new Date("2023-10-1");
+    const endDate = new Date("2023-10-3");
 
     //first day is fully booked
-    const reservationDate1 = new Date("2040-11-20T14:00:00");
+    const reservationDate1 = new Date("2023-10-01T14:00:00");
     manager.addReservation(4, "John Doe", reservationDate1, 120);
 
-    const reservationDate2 = new Date("2040-11-20T14:00:00");
+    const reservationDate2 = new Date("2023-10-01T14:00:00");
     manager.addReservation(2, "Jane Smith", reservationDate2, 120);
 
-    const reservationDate3 = new Date("2040-11-20T14:00:00");
+    const reservationDate3 = new Date("2023-10-01T14:00:00");
     manager.addReservation(2, "Jane Smith", reservationDate3, 120);
 
     // second day is partially booked
-    const reservationDate4 = new Date("2040-11-21T14:00:00");
+    const reservationDate4 = new Date("2023-10-02T14:00:00");
     manager.addReservation(4, "John Doe", reservationDate4, 60);
 
-    const reservationDate5 = new Date("2040-11-21T14:00:00");
+    const reservationDate5 = new Date("2023-10-02T14:00:00");
     manager.addReservation(2, "Jane Smith", reservationDate5, 60);
 
-    const reservationDate6 = new Date("2040-11-21T14:00:00");
+    const reservationDate6 = new Date("2023-10-02T14:00:00");
     manager.addReservation(2, "Jane Smith", reservationDate6, 60);
 
     // third day has free slots
-    const reservationDate7 = new Date("2040-11-22T14:00:00");
+    const reservationDate7 = new Date("2023-10-03T14:00:00");
     manager.addReservation(4, "John Doe", reservationDate7, 120);
 
     // Act

@@ -1,22 +1,39 @@
-import { Table, Reservation, DayAvailability } from "./types";
+import { date } from "zod";
+import {
+  Table,
+  Reservation,
+  DayAvailability,
+  WeeklyOpeningHours,
+  DateSpecificOpeningHours,
+  OpeningHours,
+} from "./types";
 
 export class ReservationManager {
   private tables: Table[];
   private reservations: Reservation[] = [];
-  private defaultDuration: number;
-  private openingTime: string;
-  private closingTime: string;
+  private defaultDuration: number = 60;
+  private openingHoursByDate: Map<string, OpeningHours>;
 
-  constructor(
-    tables: Table[],
-    defaultDuration: number = 60,
-    openingTime: string = "10:00",
-    closingTime: string = "22:00"
-  ) {
-    this.tables = tables;
-    this.defaultDuration = defaultDuration;
-    this.openingTime = openingTime;
-    this.closingTime = closingTime;
+  constructor({
+    Tables,
+    Reservation,
+    defaultDuration,
+    openingHoursByDate,
+  }: {
+    Tables: Table[];
+    Reservation?: Reservation[];
+    defaultDuration?: number;
+    openingHoursByDate?: DateSpecificOpeningHours;
+  }) {
+    this.tables = Tables;
+    if (defaultDuration) this.defaultDuration = defaultDuration;
+    if (Reservation) this.reservations = Reservation;
+    this.openingHoursByDate = new Map();
+    if (openingHoursByDate) {
+      for (const date in openingHoursByDate) {
+        this.openingHoursByDate.set(date, openingHoursByDate[date]);
+      }
+    }
   }
 
   isAvailable(
@@ -24,6 +41,21 @@ export class ReservationManager {
     startTime: Date,
     duration: number = this.defaultDuration
   ): boolean {
+    const [openingDateTime, closingDateTime] =
+      this.getOperationalHoursForDate(startTime);
+
+    if (openingDateTime === null || closingDateTime === null) {
+      // Restaurant is closed
+      return false;
+    }
+
+    // Check if the reservation time is within operational hours
+    const reservationEndTime = new Date(startTime.getTime() + duration * 60000);
+
+    if (startTime < openingDateTime || reservationEndTime > closingDateTime) {
+      return false;
+    }
+
     return this.findTablesForParty(partySize, startTime, duration) !== null;
   }
 
@@ -33,6 +65,20 @@ export class ReservationManager {
     startTime: Date,
     duration: number = this.defaultDuration
   ): Reservation {
+    const [openingDateTime, closingDateTime] =
+      this.getOperationalHoursForDate(startTime);
+
+    if (openingDateTime === null || closingDateTime === null) {
+      throw new Error("Restaurant is closed on this day");
+    }
+
+    // Check if the reservation time is within operational hours
+    const reservationEndTime = new Date(startTime.getTime() + duration * 60000);
+
+    if (startTime < openingDateTime || reservationEndTime > closingDateTime) {
+      throw new Error("Reservation time is outside operational hours");
+    }
+
     const tableIds = this.findTablesForParty(partySize, startTime, duration);
     if (!tableIds) throw new Error("No available tables");
 
@@ -158,105 +204,161 @@ export class ReservationManager {
 
   checkDayAvailability(date: Date): DayAvailability {
     const totalTables = this.tables.length;
+    const [openingDateTime, closingDateTime] =
+      this.getOperationalHoursForDate(date);
 
-    // Define opening and closing times for the given date
+    if (openingDateTime === null || closingDateTime === null) {
+      // Restaurant is closed on this day
+      return DayAvailability.Unavailable;
+    }
+
+    // Proceed with existing logic...
+    const reservationsOnDate = this.getReservationsForDate(date);
+
+    if (reservationsOnDate.length === 0) {
+      return DayAvailability.Available;
+    }
+
+    // Create events for the start and end times of reservations
+    const events = this.createEvents(
+      reservationsOnDate,
+      openingDateTime,
+      closingDateTime
+    );
+
+    // Process events to determine availability
+    return this.determineDayAvailability(
+      events,
+      totalTables,
+      openingDateTime.getTime(),
+      closingDateTime.getTime()
+    );
+  }
+  private determineDayAvailability(
+    events: { time: number; delta: number }[],
+    totalTables: number,
+    openingTime: number,
+    closingTime: number
+  ): DayAvailability {
+    let occupiedTables = 0;
+    let wasFullyBooked = false;
+    let wasAvailable = false;
+    let lastTime = openingTime;
+
+    for (const event of events) {
+      const currentTime = event.time;
+
+      // If there's an interval between lastTime and currentTime
+      if (currentTime > lastTime) {
+        if (occupiedTables === totalTables) {
+          wasFullyBooked = true;
+        } else {
+          wasAvailable = true;
+        }
+
+        // Early exit if both states have been encountered
+        if (wasFullyBooked && wasAvailable) {
+          break;
+        }
+      }
+
+      occupiedTables += event.delta;
+      lastTime = currentTime;
+    }
+
+    // After processing all events, check the interval from lastTime to closingTime
+    if (lastTime < closingTime) {
+      if (occupiedTables === totalTables) {
+        wasFullyBooked = true;
+      } else {
+        wasAvailable = true;
+      }
+    }
+
+    if (!wasFullyBooked) {
+      return DayAvailability.Available;
+    } else if (!wasAvailable) {
+      return DayAvailability.Unavailable;
+    } else {
+      return DayAvailability.PartiallyAvailable;
+    }
+  }
+  private createEvents(
+    reservations: Reservation[],
+    openingDateTime: Date,
+    closingDateTime: Date
+  ): { time: number; delta: number }[] {
+    const events: { time: number; delta: number }[] = [];
+
+    for (const reservation of reservations) {
+      const startTime = Math.max(
+        reservation.startTime.getTime(),
+        openingDateTime.getTime()
+      );
+      const endTime = Math.min(
+        reservation.startTime.getTime() + reservation.duration * 60000,
+        closingDateTime.getTime()
+      );
+
+      events.push({ time: startTime, delta: reservation.tableIds.length });
+      events.push({ time: endTime, delta: -reservation.tableIds.length });
+    }
+
+    events.sort((a, b) => a.time - b.time);
+    return events;
+  }
+  // src/ReservationManager.ts (Within the ReservationManager class)
+
+  // src/ReservationManager.ts (Within the ReservationManager class)
+
+  private getOperationalHoursForDate(date: Date): [Date | null, Date | null] {
+    const dateStr = date.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+
+    const openingHours = this.openingHoursByDate.get(dateStr);
+
+    if (
+      !openingHours ||
+      openingHours.openingTime === null ||
+      openingHours.closingTime === null
+    ) {
+      // Restaurant is closed on this day
+      return [null, null];
+    }
+
     const openingDateTime = new Date(date);
-    const [openingHour, openingMinute] = this.openingTime
+    const [openingHour, openingMinute] = openingHours.openingTime
       .split(":")
       .map(Number);
     openingDateTime.setHours(openingHour, openingMinute, 0, 0);
 
     const closingDateTime = new Date(date);
-    const [closingHour, closingMinute] = this.closingTime
+    const [closingHour, closingMinute] = openingHours.closingTime
       .split(":")
       .map(Number);
     closingDateTime.setHours(closingHour, closingMinute, 0, 0);
 
-    // Collect all events (start and end times of reservations)
-    interface Event {
-      time: Date;
-      deltaOccupiedTables: number;
+    return [openingDateTime, closingDateTime];
+  }
+  private getReservationsForDate(date: Date): Reservation[] {
+    const [openingDateTime, closingDateTime] =
+      this.getOperationalHoursForDate(date);
+
+    if (openingDateTime === null || closingDateTime === null) {
+      // Restaurant is closed; no reservations are valid
+      return [];
     }
 
-    const events: Event[] = [];
-
-    // Collect all reservations that overlap with the operational hours
-    const reservationsOnDate = this.reservations.filter((reservation) => {
-      const reservationEndTime = new Date(
-        reservation.startTime.getTime() + reservation.duration * 60000
+    return this.reservations.filter((reservation) => {
+      const reservationStart = reservation.startTime;
+      const reservationEnd = new Date(
+        reservationStart.getTime() + reservation.duration * 60000
       );
-      // Check if reservation overlaps with operational hours and the date matches
+
+      // Check if the reservation overlaps with the operational hours
       return (
-        reservation.startTime.toDateString() === date.toDateString() ||
-        reservationEndTime.toDateString() === date.toDateString()
+        reservationStart < closingDateTime && reservationEnd > openingDateTime
       );
     });
-
-    for (const reservation of reservationsOnDate) {
-      const startTime =
-        reservation.startTime < openingDateTime
-          ? openingDateTime
-          : reservation.startTime;
-      const endTime = new Date(
-        reservation.startTime.getTime() + reservation.duration * 60000
-      );
-      const adjustedEndTime =
-        endTime > closingDateTime ? closingDateTime : endTime;
-
-      // Ensure the events are within the operational hours
-      if (startTime < closingDateTime && adjustedEndTime > openingDateTime) {
-        events.push(
-          {
-            time: startTime,
-            deltaOccupiedTables: +reservation.tableIds.length,
-          },
-          {
-            time: adjustedEndTime,
-            deltaOccupiedTables: -reservation.tableIds.length,
-          }
-        );
-      }
-    }
-
-    // Add events at opening and closing times if not already present
-    events.push(
-      { time: openingDateTime, deltaOccupiedTables: 0 },
-      { time: closingDateTime, deltaOccupiedTables: 0 }
-    );
-
-    // Sort events by time
-    events.sort((a, b) => a.time.getTime() - b.time.getTime());
-
-    let occupiedTables = 0;
-    let wasFullyBookedAtAnyTime = false;
-    let wasAvailableAtAnyTime = false;
-    let lastTime = openingDateTime;
-
-    // Process events
-    for (const event of events) {
-      const currentTime = event.time;
-
-      if (currentTime > lastTime) {
-        // There is a time interval between lastTime and currentTime
-        if (occupiedTables === totalTables) {
-          wasFullyBookedAtAnyTime = true;
-        } else {
-          wasAvailableAtAnyTime = true;
-        }
-      }
-
-      occupiedTables += event.deltaOccupiedTables;
-      lastTime = currentTime;
-    }
-
-    // Determine DayAvailability
-    if (!wasFullyBookedAtAnyTime) {
-      return DayAvailability.Available;
-    } else if (!wasAvailableAtAnyTime) {
-      return DayAvailability.Unavailable;
-    } else {
-      return DayAvailability.PartiallyAvailable;
-    }
   }
   // src/ReservationManager.ts (Add this method within the ReservationManager class)
 

@@ -12,3 +12,22 @@ export interface Reservation {
   startTime: Date;
   duration: number; // in minutes
 }
+
+export enum DayAvailability {
+  Available = "Available",
+  PartiallyAvailable = "PartiallyAvailable",
+  Unavailable = "Unavailable",
+}
+
+export interface OpeningHours {
+  openingTime: string | null; // e.g., '10:00' or null if closed
+  closingTime: string | null; // e.g., '22:00' or null if closed
+}
+
+export interface WeeklyOpeningHours {
+  [day: string]: OpeningHours; // day can be 'Monday', 'Tuesday', etc.
+}
+
+export interface DateSpecificOpeningHours {
+  [date: string]: OpeningHours; // date in 'YYYY-MM-DD' format
+}

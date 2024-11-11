@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 app.use(express.json());
 
 // patch request to update an order by ID
-app.patch('/orders/:id', async (req: Request, res: Response) => {
+app.patch("/orders/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
   const { waiter_id, comment, status, items } = req.body; // Extract `items` from the request body
 
@@ -20,20 +20,21 @@ app.patch('/orders/:id', async (req: Request, res: Response) => {
         data: {
           waiter_id,
           comment,
-          status,                                                                                                                                                                                                                                   
+          status,
         },
       });
 
       // Update each item in `order_items`
       const updatedOrderItems = await Promise.all(
-        (items || []).map((item: { id: number, count?: number, price?: number }) =>
-          prisma.order_items.update({
-            where: { id: item.id },
-            data: {
-              count: item.count,
-              price: item.price,
-            },
-          })
+        (items || []).map(
+          (item: { id: number; count?: number; price?: number }) =>
+            prisma.order_items.update({
+              where: { id: item.id },
+              data: {
+                count: item.count,
+                price_in_oere: item.price,
+              },
+            })
         )
       );
 
@@ -44,12 +45,6 @@ app.patch('/orders/:id', async (req: Request, res: Response) => {
     res.json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
-});
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });

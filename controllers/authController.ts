@@ -1,7 +1,7 @@
 // controllers/authController.js
 import { PrismaClient, type personel } from "@prisma/client";
 import express, { Request, Response } from "express";
-import validationSchema from "../zodSchemas/createUserSchema";
+import { createUserSchema } from "../zodSchemas/createUserSchema";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 const prisma = new PrismaClient();
@@ -33,7 +33,7 @@ export async function signup(req: Request, res: Response): Promise<void | any> {
   };
 
   try {
-    validationSchema.parse(inputData);
+    createUserSchema.parse(inputData);
   } catch (error) {
     if (error instanceof z.ZodError)
       return res.status(400).json({ message: error.flatten() });
@@ -175,8 +175,6 @@ export async function refreshToken(
 
     // 4. Generate a new access token
     const accessToken = await tokenService.generateAccessToken(user, audience);
-    console.log("Access token generated successfully");
-
     res.status(200).json({ accessToken });
   } catch (error) {
     // if anything goes wrong, return a 401 status

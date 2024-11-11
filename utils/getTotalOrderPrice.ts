@@ -8,15 +8,8 @@ async function getTotalOrderPrice(orderId: number) {
   });
 
   const totalPrice = items.reduce((total, item) => {
-    return total + item.price * item.count;
+    return total + item.price_in_oere * item.count;
   }, 0);
 
   return totalPrice;
 }
-
-// Example usage:
-getTotalOrderPrice(1)
-  .then((totalPrice) => {
-    console.log("Total Price:", totalPrice);
-  })
-  .catch(console.error);

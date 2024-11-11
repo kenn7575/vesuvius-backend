@@ -11,12 +11,12 @@ export async function updateMenuItem(
 
   // TODO: Add validation for the request body and access control
 
-  const { name, description, price_in_kr, type_id } = req.body;
+  const { name, description, price_in_oere, type_id } = req.body;
 
   try {
     const updatedMenuItem = await prisma.menu_item.update({
       where: { id: parseInt(id) },
-      data: { name, description, price_in_kr, type_id },
+      data: { name, description, price_in_oere, type_id },
     });
     res.json(updatedMenuItem);
   } catch (error) {

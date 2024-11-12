@@ -12,7 +12,7 @@ export class ReservationManager {
   private tables: Table[];
   private reservations: Reservation[] = [];
   private defaultDuration: number = 60;
-  private openingHoursByDate: Map<string, OpeningHours>;
+  private openingHoursByDate: Map<string, OpeningHours> = new Map();
 
   constructor({
     Tables,
@@ -28,7 +28,6 @@ export class ReservationManager {
     this.tables = Tables;
     if (defaultDuration) this.defaultDuration = defaultDuration;
     if (Reservation) this.reservations = Reservation;
-    this.openingHoursByDate = new Map();
     if (openingHoursByDate) {
       for (const date in openingHoursByDate) {
         this.openingHoursByDate.set(date, openingHoursByDate[date]);

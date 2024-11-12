@@ -117,3 +117,17 @@ model menu_item_types {
   updated_at DateTime    @default(now()) @db.Timetz(6)
   menu_item  menu_item[]
 }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model default_open_hours {
+  day_of_week  Int       @id @db.SmallInt
+  opening_time DateTime? @db.Time(6)
+  closing_time DateTime? @db.Time(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model specific_open_hours {
+  date         DateTime  @id @db.Date
+  opening_time DateTime? @db.Time(6)
+  closing_time DateTime? @db.Time(6)
+}

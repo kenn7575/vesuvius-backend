@@ -15,8 +15,8 @@ const router = express.Router();
 router.post("/", authenticateToken, createMenuItem); //create
 router.put("/:id", authenticateToken, updateMenuItem); //update specific
 router.delete("/:id/deactivate", authenticateToken, deactivateMenuItem); //delete specific
-router.get("/:id", authenticateToken, getMenuItem); //get specific
-router.get("/", authenticateToken, getAllMenuItems); //get all
+router.get("/:id", getMenuItem); //get specific
+router.get("/", getAllMenuItems); //get all
 router.patch("/:id/activate", authenticateToken, activateMenuItem); //deactivate specific
 
 export default router;

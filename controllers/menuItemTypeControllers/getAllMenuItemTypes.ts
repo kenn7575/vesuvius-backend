@@ -1,16 +1,14 @@
 import express, { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { menu_item, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function getAllMenuItems(
+export async function getAllMenuItemTypes(
   req: Request,
   res: Response
-): Promise<void | any> {
+): Promise<void> {
   try {
-    const menuItems = await prisma.menu_item.findMany({
-      where: { is_active: true },
-    });
+    const menuItems = await prisma.menu_item_types.findMany();
     res.json(menuItems);
   } catch (error) {
     console.error(error);
@@ -18,4 +16,4 @@ export async function getAllMenuItems(
   }
 }
 
-export default getAllMenuItems;
+export default getAllMenuItemTypes;

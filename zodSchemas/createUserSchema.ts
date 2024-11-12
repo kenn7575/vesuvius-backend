@@ -24,4 +24,20 @@ const createUserSchema = z.object({
   role_id: idSchema,
 });
 
-export { createUserSchema, idSchema };
+const getReservationAvailabilityInRangeSchema = z.object({
+  start_date: z
+    .string()
+    .regex(/^[0-9-]+$/, "Start date must contain only numbers and '-'")
+    .max(10),
+  end_date: z
+    .string()
+    .regex(/^[0-9-]+$/, "End date must contain only numbers and '-'")
+    .max(10),
+});
+
+export const loginInputSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(1, "Udfyld venligst adgangskoden"),
+});
+
+export { createUserSchema, idSchema, getReservationAvailabilityInRangeSchema };

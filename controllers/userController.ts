@@ -2,7 +2,7 @@
 import { PrismaClient, type personel } from "@prisma/client";
 import express, { Request, Response } from "express";
 const prisma = new PrismaClient();
-export async function userData(
+export async function getUserData(
   req: Request,
   res: Response
 ): Promise<void | any> {

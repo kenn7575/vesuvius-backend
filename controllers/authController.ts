@@ -1,7 +1,10 @@
 // controllers/authController.js
 import { PrismaClient, type personel } from "@prisma/client";
 import express, { Request, Response } from "express";
-import { createUserSchema } from "../zodSchemas/createUserSchema";
+import {
+  createUserSchema,
+  loginInputSchema,
+} from "../zodSchemas/createUserSchema";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 const prisma = new PrismaClient();
@@ -84,6 +87,15 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   }
 
   // TODO: Add validation for email and password
+  const result = loginInputSchema.safeParse({ email, password });
+  if (!result.success) {
+    return res
+      .status(400)
+      .json({
+        message: "Validation error",
+        fieldErrors: result.error.flatten().fieldErrors,
+      });
+  }
 
   // Find the user by email
   const user = await prisma.personel.findUnique({
@@ -93,7 +105,9 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   });
 
   if (!user) {
-    return res.status(400).json({ message: "Invalid credentials" });
+    return res
+      .status(400)
+      .json({ message: "Invalid credentials. No matchign email" });
   }
 
   // Verify the password

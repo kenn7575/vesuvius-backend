@@ -1,10 +1,10 @@
 // routes/userRoutes.js
 import express from "express";
-import { userData } from "../controllers/userController";
+import { getUserData } from "../controllers/userController";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
-router.get("/protected", authenticateToken, userData);
+router.get("/", authenticateToken, getUserData);
 
 export default router;

@@ -4,7 +4,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.ts ",
-    "test": "vitest"
+    "test": " npm-run-all test:unit test:integration",
+    "test:unit": "vitest run --passWithNoTests tests/* | tee logs/unit-test.log",
+    "test:integration": "npm-run-all --continue-on-error db:start db:setup test:integration:run db:stop",
+    "test:integration:run": "vitest run --passWithNoTests intergrationsTests/databaseConnection | tee logs/integration-test.log",
+    "db:start": "docker-compose up -d test_db > logs/db-start.log 2>&1",
+    "db:setup": "cross-env NODE_ENV=test node intergrationsTests/databaseConnection/db-setup.js > logs/db-setup.log 2>&1",
+    "db:stop": "docker-compose down > logs/db-stop.log 2>&1"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +22,7 @@
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express-rate-limit": "^7.4.1",
     "jsonwebtoken": "^9.0.2",
@@ -23,15 +30,22 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.8.4",
+    "@types/supertest": "^6.0.2",
+    "@types/wait-on": "^5.3.4",
     "@vitest/coverage-v8": "^2.1.4",
+    "cross-env": "^7.0.3",
     "express": "^4.21.1",
     "nodemon": "^3.1.7",
+    "npm-run-all": "^4.1.5",
     "prisma": "^5.21.1",
+    "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "wait-on": "^8.0.1"
   }
 }

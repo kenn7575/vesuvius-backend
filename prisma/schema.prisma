@@ -15,16 +15,19 @@ model cafe_table {
 }
 
 model menu_item {
-  id              Int             @id @default(autoincrement())
-  name            String          @db.VarChar
-  description     String?         @db.VarChar
-  type_id         Int
-  created_at      DateTime        @default(now()) @db.Timetz(6)
-  updated_at      DateTime        @default(now()) @db.Timetz(6)
-  is_active       Boolean         @default(true)
-  price_in_oere   Int
-  order_item_type menu_item_types @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  order_items     order_items[]
+  id                    Int             @id @default(autoincrement())
+  name                  String          @db.VarChar
+  description           String?         @db.VarChar
+  type_id               Int
+  created_at            DateTime        @default(now()) @db.Timetz(6)
+  updated_at            DateTime        @default(now()) @db.Timetz(6)
+  is_active             Boolean         @default(true)
+  price_in_oere         Int
+  is_sold_out           Boolean?
+  is_lacking_ingredient Boolean?
+  comment               String?
+  order_item_type       menu_item_types @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_items           order_items[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -116,18 +119,4 @@ model menu_item_types {
   created_at DateTime    @default(now()) @db.Timetz(6)
   updated_at DateTime    @default(now()) @db.Timetz(6)
   menu_item  menu_item[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model default_open_hours {
-  day_of_week  Int       @id @db.SmallInt
-  opening_time DateTime? @db.Time(6)
-  closing_time DateTime? @db.Time(6)
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model specific_open_hours {
-  date         DateTime  @id @db.Date
-  opening_time DateTime? @db.Time(6)
-  closing_time DateTime? @db.Time(6)
 }

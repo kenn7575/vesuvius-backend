@@ -8,9 +8,19 @@ export async function getAllMenuItems(
   res: Response
 ): Promise<void | any> {
   try {
-    const menuItems = await prisma.menu_item.findMany({
-      where: { is_active: true },
-    });
+    const item_type_id: string = req.query.item_type_id as string;
+    console.log("🚀 ~ item_type_id:", item_type_id, typeof item_type_id);
+
+    let menuItems;
+    if (parseInt(item_type_id)) {
+      menuItems = await prisma.menu_item.findMany({
+        where: { type_id: parseInt(item_type_id), is_active: true },
+      });
+    } else {
+      menuItems = await prisma.menu_item.findMany({
+        where: { is_active: true },
+      });
+    }
     res.json(menuItems);
   } catch (error) {
     console.error(error);

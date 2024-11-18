@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { idSchema } from "../../zodSchemas/createUserSchema";
+import { idSchema } from "../../zodSchemas/schemas";
 
 const prisma = new PrismaClient();
 

@@ -1,10 +1,7 @@
 // controllers/authController.js
 import { PrismaClient, type personel } from "@prisma/client";
 import express, { Request, Response } from "express";
-import {
-  createUserSchema,
-  loginInputSchema,
-} from "../zodSchemas/createUserSchema";
+import { createUserSchema, loginInputSchema } from "../zodSchemas/schemas";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 const prisma = new PrismaClient();
@@ -89,12 +86,10 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   // TODO: Add validation for email and password
   const result = loginInputSchema.safeParse({ email, password });
   if (!result.success) {
-    return res
-      .status(400)
-      .json({
-        message: "Validation error",
-        fieldErrors: result.error.flatten().fieldErrors,
-      });
+    return res.status(400).json({
+      message: "Validation error",
+      fieldErrors: result.error.flatten().fieldErrors,
+    });
   }
 
   // Find the user by email

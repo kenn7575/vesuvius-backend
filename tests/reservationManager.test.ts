@@ -146,50 +146,71 @@ describe("ReservationManager checkAvailabilityInRange", () => {
     const availability = manager.checkAvailabilityInRange(startDate, endDate);
 
     expect(availability).toEqual([
-      DayAvailability.Available.toString(),
-      DayAvailability.Available.toString(),
-      DayAvailability.Available.toString(),
+      {
+        availability: DayAvailability.Available.toString(),
+        date: "2023-10-01",
+      },
+      {
+        availability: DayAvailability.Available.toString(),
+        date: "2023-10-02",
+      },
+      {
+        availability: DayAvailability.Available.toString(),
+        date: "2023-10-03",
+      },
     ]);
   });
 
   test("should return correct availability for a range with varying availability", () => {
     // Arrange
-    const startDate = new Date("2023-10-1");
-    const endDate = new Date("2023-10-3");
+    const startDate = new Date("2023-10-01");
+    const endDate = new Date("2023-10-03");
 
-    //first day is fully booked
-    const reservationDate1 = new Date("2023-10-01T14:00:00");
-    manager.addReservation(4, "John Doe", reservationDate1, 120);
+    // First day is fully booked
+    const reservationDate1 = new Date("2023-10-01T10:00:00");
+    manager.addReservation(4, "John Doe", reservationDate1, 720);
 
-    const reservationDate2 = new Date("2023-10-01T14:00:00");
-    manager.addReservation(2, "Jane Smith", reservationDate2, 120);
+    const reservationDate2 = new Date("2023-10-01T10:00:00");
+    manager.addReservation(2, "Jane Smith", reservationDate2, 720);
 
-    const reservationDate3 = new Date("2023-10-01T14:00:00");
-    manager.addReservation(2, "Jane Smith", reservationDate3, 120);
+    const reservationDate3 = new Date("2023-10-01T10:00:00");
+    manager.addReservation(2, "Bob Brown", reservationDate3, 720);
 
-    // second day is partially booked
+    // Second day is partially booked
     const reservationDate4 = new Date("2023-10-02T14:00:00");
-    manager.addReservation(4, "John Doe", reservationDate4, 60);
+    manager.addReservation(4, "Alice Green", reservationDate4, 60);
 
     const reservationDate5 = new Date("2023-10-02T14:00:00");
-    manager.addReservation(2, "Jane Smith", reservationDate5, 60);
+    manager.addReservation(2, "Charlie Blue", reservationDate5, 60);
 
     const reservationDate6 = new Date("2023-10-02T14:00:00");
-    manager.addReservation(2, "Jane Smith", reservationDate6, 60);
+    manager.addReservation(2, "Diana Yellow", reservationDate6, 60);
 
-    // third day has free slots
+    // Third day has free slots
     const reservationDate7 = new Date("2023-10-03T14:00:00");
-    manager.addReservation(4, "John Doe", reservationDate7, 120);
+    manager.addReservation(4, "Eve Red", reservationDate7, 120);
 
     // Act
     const availability = manager.checkAvailabilityInRange(startDate, endDate);
 
+    // Expected availability
+    const expectedAvailability = [
+      {
+        date: "2023-10-01",
+        availability: DayAvailability.Unavailable.toString(),
+      },
+      {
+        date: "2023-10-02",
+        availability: DayAvailability.PartiallyAvailable.toString(),
+      },
+      {
+        date: "2023-10-03",
+        availability: DayAvailability.Available.toString(),
+      },
+    ];
+
     // Assert
-    expect(availability).toEqual([
-      DayAvailability.Unavailable.toString(),
-      DayAvailability.PartiallyAvailable.toString(),
-      DayAvailability.Available.toString(),
-    ]);
+    expect(availability).toEqual(expectedAvailability);
   });
 
   test("should throw an error if startDate is after endDate", () => {

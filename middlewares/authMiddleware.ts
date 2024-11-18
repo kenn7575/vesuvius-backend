@@ -16,9 +16,6 @@ export async function authenticateToken(
   const audience = req.headers["audience"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  console.log("audience: ", audience);
-  console.log("token: ", token);
-
   if (!token) {
     return res
       .status(401)

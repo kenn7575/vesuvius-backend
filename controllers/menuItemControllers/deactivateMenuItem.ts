@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { idSchema } from "../../zodSchemas/createUserSchema";
+import { idSchema } from "../../zodSchemas/schemas";
 
 const prisma = new PrismaClient();
 
@@ -12,7 +12,6 @@ export async function deactivateMenuItem(
 
   const validatedId = idSchema.safeParse(id);
   if (!validatedId.success) {
-    console.log(JSON.stringify(validatedId.error));
     return res
       .status(400)
       .json({ message: validatedId.error.flatten().formErrors });

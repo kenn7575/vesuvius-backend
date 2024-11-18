@@ -89,12 +89,10 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   // TODO: Add validation for email and password
   const result = loginInputSchema.safeParse({ email, password });
   if (!result.success) {
-    return res
-      .status(400)
-      .json({
-        message: "Validation error",
-        fieldErrors: result.error.flatten().fieldErrors,
-      });
+    return res.status(400).json({
+      message: "Validation error",
+      fieldErrors: result.error.flatten().fieldErrors,
+    });
   }
 
   // Find the user by email

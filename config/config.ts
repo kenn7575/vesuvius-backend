@@ -3,8 +3,11 @@ require("dotenv").config();
 
 const config = {
   jwtSecret: process.env.JWT_SECRET,
-  accessTokenExpiration: process.env.ACCESS_TOKEN_EXPIRATION || "15m",
-  refreshTokenExpiration: process.env.REFRESH_TOKEN_EXPIRATION || "7d",
+  accessTokenExpiration: process.env.ACCESS_TOKEN_EXPIRATION || 15, // 15 seconds
+
+  refreshTokenExpiration:
+    process.env.REFRESH_TOKEN_EXPIRATION || 60 * 60 * 24 * 7, // 7 days
+
   saltRounds: process.env.SALT_ROUNDS || 10,
   DbUser: process.env.DB_USER,
   DbPassword: process.env.DB_PASSWORD,

@@ -24,12 +24,16 @@ export class TokenService {
     if (!audience || audience === "") {
       throw new Error("Audience not set");
     }
+    const accessTokenExpirationNumber = parseInt(
+      this.config.accessTokenExpiration
+    );
 
     const { password, ...userWithoutPassword } = user;
 
     const token = jwt.sign(userWithoutPassword, this.config.jwtSecret, {
       algorithm: "HS256",
-      expiresIn: this.config.accessTokenExpiration,
+      expiresIn:
+        accessTokenExpirationNumber || this.config.accessTokenExpiration,
       subject: user.id.toString(),
       // the audience is encrypted to prevent hackers from copying it and use it to gain access
       audience: await this.encryptString(audience),
@@ -48,11 +52,16 @@ export class TokenService {
       throw new Error("JWT secret not set");
     }
 
+    const refreshTokenExpirationNumber = parseInt(
+      this.config.refreshTokenExpiration
+    );
+
     const { password, ...userWithoutPassword } = user;
 
     const token = jwt.sign(userWithoutPassword, this.config.jwtSecret, {
       algorithm: "HS256",
-      expiresIn: this.config.refreshTokenExpiration,
+      expiresIn:
+        refreshTokenExpirationNumber || this.config.refreshTokenExpiration,
       subject: user.id.toString(),
       audience,
     });
@@ -62,7 +71,6 @@ export class TokenService {
 
     // create in database
     this.saveRefreshToken(user.id, encryptedToken);
-
     return encryptedToken;
   }
 

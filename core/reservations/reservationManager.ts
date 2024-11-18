@@ -1,4 +1,3 @@
-import { date } from "zod";
 import {
   Table,
   Reservation,
@@ -29,9 +28,9 @@ export class ReservationManager {
     if (defaultDuration) this.defaultDuration = defaultDuration;
     if (Reservation) this.reservations = Reservation;
     if (openingHoursByDate) {
-      for (const date in openingHoursByDate) {
-        this.openingHoursByDate.set(date, openingHoursByDate[date]);
-      }
+      Object.entries(openingHoursByDate).forEach(([date, hours]) => {
+        this.openingHoursByDate.set(date, hours);
+      });
     }
   }
 
@@ -325,13 +324,13 @@ export class ReservationManager {
     }
 
     const openingDateTime = new Date(date);
-    const [openingHour, openingMinute] = openingHours.openingTime
+    const [openingHour, openingMinute] = String(openingHours.openingTime)
       .split(":")
       .map(Number);
     openingDateTime.setHours(openingHour, openingMinute, 0, 0);
 
     const closingDateTime = new Date(date);
-    const [closingHour, closingMinute] = openingHours.closingTime
+    const [closingHour, closingMinute] = String(openingHours.closingTime)
       .split(":")
       .map(Number);
     closingDateTime.setHours(closingHour, closingMinute, 0, 0);
@@ -361,8 +360,11 @@ export class ReservationManager {
   }
   // src/ReservationManager.ts (Add this method within the ReservationManager class)
 
-  checkAvailabilityInRange(startDate: Date, endDate: Date): string[] {
-    const availabilityArray: string[] = [];
+  checkAvailabilityInRange(
+    startDate: Date,
+    endDate: Date
+  ): { availability: string; date: string }[] {
+    const availabilityArray: { availability: string; date: string }[] = [];
 
     // Ensure startDate is not after endDate
     if (startDate > endDate) {
@@ -375,7 +377,10 @@ export class ReservationManager {
     // Loop through each day in the range
     while (currentDate <= endDate) {
       const availability = this.checkDayAvailability(currentDate);
-      availabilityArray.push(availability.toString());
+      availabilityArray.push({
+        availability: availability.toString(),
+        date: currentDate.toISOString().split("T")[0],
+      });
 
       // Move to the next day
       currentDate.setDate(currentDate.getDate() + 1);

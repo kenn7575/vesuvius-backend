@@ -24,10 +24,10 @@ export interface OpeningHours {
   closingTime: string | null; // e.g., '22:00' or null if closed
 }
 
-export interface WeeklyOpeningHours {
-  [day: string]: OpeningHours; // day can be 'Monday', 'Tuesday', etc.
-}
-
 export interface DateSpecificOpeningHours {
   [date: string]: OpeningHours; // date in 'YYYY-MM-DD' format
+}
+
+export interface WeeklyOpeningHours {
+  [day: string]: OpeningHours; // day can be 'Monday', 'Tuesday', etc.
 }

@@ -1,10 +1,7 @@
 // controllers/authController.js
 import { PrismaClient, type personel } from "@prisma/client";
 import express, { Request, Response } from "express";
-import {
-  createUserSchema,
-  loginInputSchema,
-} from "../zodSchemas/createUserSchema";
+import { createUserSchema, loginInputSchema } from "../zodSchemas/schemas";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 const prisma = new PrismaClient();

@@ -8,6 +8,7 @@ import menuItemTypesRoutes from "./routes/MenuItemTypeRoutes";
 import limiter from "./utils/rateLimiter";
 import reservationRoutes from "./routes/reservationRoutes";
 import cors from "cors";
+import { tableRoutes } from "./controllers/tableControllors/getAllTables";
 
 dotenv.config();
 
@@ -26,10 +27,15 @@ app.use("/user", userRoutes); // only for testing purposes. TODO: remove this la
 app.use("/menu_items", menuItemRoutes);
 app.use("/menu_item_types", menuItemTypesRoutes);
 app.use("/reservations", reservationRoutes);
+app.use("/tables", tableRoutes);
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}`)
 );
 
+import { randomBytes } from "crypto";
+
+const key = randomBytes(32).toString("base64");
+console.log(key);
 export default app;

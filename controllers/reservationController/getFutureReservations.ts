@@ -17,6 +17,9 @@ export async function getFutureReservations(
     include: {
       tables_in_orders_and_reservations: true,
     },
+    orderBy: {
+      time: "asc",
+    },
   });
 
   console.log(reservations);

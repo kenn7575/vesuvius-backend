@@ -28,6 +28,7 @@ model menu_item {
   comment               String?
   order_item_type       menu_item_types @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items           order_items[]
+  image_path            String?
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

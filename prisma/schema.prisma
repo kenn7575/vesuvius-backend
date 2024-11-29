@@ -23,12 +23,12 @@ model menu_item {
   updated_at            DateTime        @default(now()) @db.Timetz(6)
   is_active             Boolean         @default(true)
   price_in_oere         Int
-  is_sold_out           Boolean?
-  is_lacking_ingredient Boolean?
   comment               String?
+  is_lacking_ingredient Boolean?
+  is_sold_out           Boolean?
+  image_path            String?
   order_item_type       menu_item_types @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items           order_items[]
-  image_path            String?
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -83,6 +83,7 @@ model reservation {
   customer_phone_number             String                              @db.VarChar
   created_at                        DateTime                            @default(now()) @db.Timetz(6)
   updated_at                        DateTime                            @default(now()) @db.Timetz(6)
+  email                             String?
   personel                          personel?                           @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tables_in_orders_and_reservations tables_in_orders_and_reservations[]
 }
@@ -104,7 +105,7 @@ model tables_in_orders_and_reservations {
   updated_at     DateTime     @default(now()) @db.Timetz(6)
   order          order?       @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   reservation    reservation? @relation(fields: [reservation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  cafe_table     cafe_table?  @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cafe_table     cafe_table   @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model refresh_tokens {
@@ -119,8 +120,8 @@ model menu_item_types {
   name       String      @db.VarChar
   created_at DateTime    @default(now()) @db.Timetz(6)
   updated_at DateTime    @default(now()) @db.Timetz(6)
+  is_food    Boolean?
   menu_item  menu_item[]
-  is_food               Boolean?
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

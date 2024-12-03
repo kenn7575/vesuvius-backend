@@ -12,6 +12,7 @@ const router = express.Router();
 // all routes in this file are protected by the authenticateToken middleware
 // all routes in this file are prefixed with /menu_items
 
+// todo: add access control with roleId in each controller
 router.post("/", authenticateToken, createMenuItem); //create
 router.put("/:id", authenticateToken, updateMenuItem); //update specific
 router.delete("/:id/deactivate", authenticateToken, deactivateMenuItem); //delete specific

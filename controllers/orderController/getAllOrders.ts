@@ -13,22 +13,15 @@ export async function getOrder(
   if (res.locals.roleId < 1) {
     return res.status(403).send("Forbidden");
   }
-  const { id } = req.params;
-  if (!id || isNaN(Number(id))) {
-    return res.status(400).send("Bad Request");
-  }
 
   try {
-    const order = await prisma.order.findUnique({
-      where: {
-        id: Number(id),
-      },
+    const orders = await prisma.order.findMany({
       include: {
         order_items: true,
         tables_in_orders_and_reservations: true,
       },
     });
-    return res.json(order);
+    return res.json(orders);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");

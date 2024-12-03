@@ -8,7 +8,8 @@ import menuItemTypesRoutes from "./routes/MenuItemTypeRoutes";
 import limiter from "./utils/rateLimiter";
 import reservationRoutes from "./routes/reservationRoutes";
 import cors from "cors";
-import menuRouter from "./routes/menuRutes";
+import menuRouter from "./routes/menuRoutes";
+import orderRoutes from "./routes/orderRoutes";
 import { tableRoutes } from "./controllers/tableControllors/getAllTables";
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use("/menu_item_types", menuItemTypesRoutes);
 app.use("/reservations", reservationRoutes);
 app.use("/tables", tableRoutes); //TODO: move to table Routes
 app.use("/menu", menuRouter);
+app.use("/orders", orderRoutes);
 
 const PORT = process.env.PORT || 5005;
 app.listen(PORT, () =>

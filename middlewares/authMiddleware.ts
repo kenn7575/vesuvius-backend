@@ -41,7 +41,8 @@ export async function authenticateToken(
     return res.sendStatus(403);
   }
 
-  res.locals.userId = tokenPayload.sub;
+  res.locals.userId = Number(tokenPayload.sub);
+  res.locals.roleId = Number(tokenPayload.role_id);
 
   next();
 }

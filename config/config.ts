@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const config = {
   jwtSecret: process.env.JWT_SECRET,
-  accessTokenExpiration: process.env.ACCESS_TOKEN_EXPIRATION || 15, // 15 seconds
+  accessTokenExpiration: process.env.ACCESS_TOKEN_EXPIRATION || 60 * 60, // 1 hour
 
   refreshTokenExpiration:
     process.env.REFRESH_TOKEN_EXPIRATION || 60 * 60 * 24 * 7, // 7 days

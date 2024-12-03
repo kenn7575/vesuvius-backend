@@ -1,14 +1,14 @@
 // routes/authRoutes.js
 import express from "express";
 import { signup, signin, refreshToken } from "../controllers/authController";
-import { authenticateToken } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 import { createMenuItem } from "../controllers/orderController/createOrder";
 
 const router = express.Router();
 
-router.post("/", authenticateToken, createMenuItem); // create
-router.patch("/:id", authenticateToken); // update
-router.get("/:id", authenticateToken); // get specific
-router.get("/", authenticateToken); // get all
+router.post("/", authMiddleware, createMenuItem); // create
+router.patch("/:id", authMiddleware); // update
+router.get("/:id", authMiddleware); // get specific
+router.get("/", authMiddleware); // get all
 
 export default router;

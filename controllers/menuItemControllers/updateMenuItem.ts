@@ -7,11 +7,14 @@ export async function updateMenuItem(
   req: Request,
   res: Response
 ): Promise<void | any> {
+  const roleId = res.locals.roleId;
+  if (!roleId || roleId < 2) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   const { id } = req.params;
 
-  // TODO: Add validation for the request body and access control
-
   const { name, description, price_in_oere, type_id } = req.body;
+  // todo: validate the input
 
   try {
     const updatedMenuItem = await prisma.menu_item.update({

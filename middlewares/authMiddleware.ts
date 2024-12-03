@@ -7,7 +7,7 @@ import { TokenService } from "../core/auth/tokenService";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export async function authenticateToken(
+export async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
@@ -39,6 +39,9 @@ export async function authenticateToken(
 
   if (!tokenPayload) {
     return res.sendStatus(403);
+  }
+  if (tokenPayload.role_id < 1) {
+    return res.status(403).send("Forbidden");
   }
 
   res.locals.userId = Number(tokenPayload.sub);

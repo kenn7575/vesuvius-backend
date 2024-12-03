@@ -1,7 +1,4 @@
-// todo: roleId
-//todo: combine with orderItems
-
-import express, { Request, Response } from "express";
+import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();

@@ -36,10 +36,6 @@ export async function createMenuItem(
   req: Request,
   res: Response
 ): Promise<void | any> {
-  if (res.locals.roleId < 1) {
-    return res.status(403).send("Forbidden");
-  }
-
   const result = createOrderSchema.safeParse(req.body);
   if (!result.success) {
     return res

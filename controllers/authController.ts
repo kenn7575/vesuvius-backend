@@ -83,7 +83,6 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
     throw new Error("JWT secret not set");
   }
 
-  // TODO: Add validation for email and password
   const result = loginInputSchema.safeParse({ email, password });
   if (!result.success) {
     return res.status(400).json({

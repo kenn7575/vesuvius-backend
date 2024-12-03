@@ -1,6 +1,6 @@
 import express from "express";
 import { signup, signin, refreshToken } from "../controllers/authController";
-import { authenticateToken } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 import getDailyReservationAvailability from "../controllers/reservationController/getDailyReservationAvailability";
 import getHourlyReservationAvailability from "../controllers/reservationController/getHourlyReservationAvailability";
 import { getFutureReservations } from "../controllers/reservationController/getFutureReservations";
@@ -13,8 +13,9 @@ router.get("/day", getHourlyReservationAvailability);
 router.get("/", getFutureReservations);
 router.post("/", createNewReservation);
 
-router.patch("/reservations/:id", authenticateToken);
-router.delete("/reservations/:id", authenticateToken);
-router.get("/reservations/:id", authenticateToken);
+// todo: add the controllers for the following routes
+router.patch("/:id", authMiddleware);
+router.delete("/:id", authMiddleware);
+router.get("/:id", authMiddleware);
 
 export default router;

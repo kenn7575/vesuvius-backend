@@ -8,9 +8,9 @@ export async function createMenuItem(
   req: Request,
   res: Response
 ): Promise<void | any> {
-  const roleId = res.locals.user?.role_id;
+  const roleId = res.locals.roleId;
 
-  if (!roleId || roleId <= 1) {
+  if (!roleId || roleId < 2) {
     return res.status(403).json({ message: "Forbidden" });
   }
 

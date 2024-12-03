@@ -8,6 +8,11 @@ export async function deactivateMenuItem(
   req: Request,
   res: Response
 ): Promise<void | any> {
+  const roleId = res.locals.roleId;
+  if (!roleId || roleId < 2) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   const { id } = req.params;
 
   const validatedId = idSchema.safeParse(id);

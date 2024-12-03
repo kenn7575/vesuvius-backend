@@ -10,7 +10,8 @@ import reservationRoutes from "./routes/reservationRoutes";
 import cors from "cors";
 import menuRouter from "./routes/menuRoutes";
 import orderRoutes from "./routes/orderRoutes";
-import { tableRoutes } from "./controllers/tableControllors/getAllTables";
+import tableRoutes from "./routes/tableRouts";
+import { getAllTables } from "./controllers/tableControllors/getAllTables";
 
 dotenv.config();
 
@@ -25,11 +26,11 @@ app.use(cors(corsOptions));
 app.use("/auth/signin", limiter);
 app.use("/auth/signup", limiter);
 app.use("/auth", authRoutes);
-app.use("/user", userRoutes); // only for testing purposes. TODO: remove this later
+app.use("/user", userRoutes);
 app.use("/menu_items", menuItemRoutes);
 app.use("/menu_item_types", menuItemTypesRoutes);
 app.use("/reservations", reservationRoutes);
-app.use("/tables", tableRoutes); //TODO: move to table Routes
+app.use("/tables", tableRoutes);
 app.use("/menu", menuRouter);
 app.use("/orders", orderRoutes);
 

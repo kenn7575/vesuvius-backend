@@ -16,13 +16,17 @@ export async function authMiddleware(
   const audience = req.headers["audience"];
   const token = authHeader && authHeader.split(" ")[1];
 
+  const ip = req.socket?.remoteAddress;
   if (!token) {
     return res
       .status(401)
       .json({ message: "Unauthorized. No token provided." });
   }
 
-  if (!audience || audience === "" || typeof audience !== "string") {
+  if (
+    (!audience || audience === "" || typeof audience !== "string") &&
+    (!ip || ip === "" || typeof ip !== "string")
+  ) {
     return res
       .status(401)
       .json({ message: "Audience not set or incorrectly formatted" });
@@ -35,7 +39,10 @@ export async function authMiddleware(
   const refreshTokenRepository = new RefreshTokenRepositoryImpl(prisma);
   const tokenService = new TokenService(refreshTokenRepository);
 
-  const tokenPayload = await tokenService.validateAccessToken(token, audience);
+  const tokenPayload = await tokenService.validateAccessToken(
+    token,
+    (audience as string) ?? (ip as string)
+  );
 
   if (!tokenPayload) {
     return res.sendStatus(403);

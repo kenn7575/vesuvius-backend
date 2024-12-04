@@ -8,6 +8,7 @@ export async function getAllTables(
   res: Response
 ): Promise<void | any> {
   const tables = await prisma.cafe_table.findMany();
+  console.log("🚀 ~ tables:", tables);
 
   return res.json(tables);
 }

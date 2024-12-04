@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.ts ",
+    "dev": "nodemon index.ts --host",
     "test": " npm-run-all test:unit test:integration",
     "test:unit": "vitest run --passWithNoTests tests/* | tee logs/unit-test.log",
     "test:integration": "npm-run-all --continue-on-error db:start db:setup test:integration:run db:stop",

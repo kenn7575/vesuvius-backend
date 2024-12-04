@@ -35,13 +35,9 @@ app.use("/menu", menuRouter);
 app.use("/orders", orderRoutes);
 
 const PORT = process.env.PORT || 5005;
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
 
-import { randomBytes } from "crypto";
-import { getMenu } from "./controllers/reservationController/getMenuWithTypes";
+app.listen(Number(PORT), "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-const key = randomBytes(32).toString("base64");
-console.log(key);
 export default app;

@@ -42,6 +42,7 @@ model order {
   personel                          personel                            @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items                       order_items[]
   tables_in_orders_and_reservations tables_in_orders_and_reservations[]
+  total_price_in_oere               Int                              
 }
 
 model order_items {

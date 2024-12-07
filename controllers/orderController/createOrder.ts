@@ -59,6 +59,14 @@ export async function createMenuItem(
     // create order
     const order = await prisma.order.create({
       data: {
+        total_price_in_oere: data.order_items.reduce(
+          (acc, orderItem) =>
+            acc +
+            menuItems.find((menuItem) => menuItem.id === orderItem.menu_item_id)
+              ?.price_in_oere! *
+              orderItem.quantity,
+          0
+        ),
         comment: data.comment,
         status: "Pending",
         created_at: new Date(),
@@ -85,6 +93,7 @@ export async function createMenuItem(
         tables_in_orders_and_reservations: true,
       },
     });
+    console.log("🚀 ~ order:", order);
 
     res.status(200).json(order);
   } catch (error) {

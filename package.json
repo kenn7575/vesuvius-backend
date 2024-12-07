@@ -18,7 +18,8 @@
   "description": "",
   "dependencies": {
     "@acpr/rate-limit-postgresql": "^1.4.1",
-    "@prisma/client": "^5.21.1",
+    "@faker-js/faker": "^9.3.0",
+    "@prisma/client": "^6.0.1",
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",

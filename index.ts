@@ -10,15 +10,16 @@ import reservationRoutes from "./routes/reservationRoutes";
 import cors from "cors";
 import menuRouter from "./routes/menuRoutes";
 import orderRoutes from "./routes/orderRoutes";
-import tableRoutes from "./routes/tableRouts";
-import { getAllTables } from "./controllers/tableControllors/getAllTables";
+import tableRoutes from "./routes/tableRoutes";
+import testRoutes from "./routes/testRoutes";
+import analyticsRoutes from "./routes/analyticsRoutes";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 var corsOptions = {
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:3001"],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 app.use(cors(corsOptions));
@@ -33,6 +34,8 @@ app.use("/reservations", reservationRoutes);
 app.use("/tables", tableRoutes);
 app.use("/menu", menuRouter);
 app.use("/orders", orderRoutes);
+app.use("/test", testRoutes);
+app.use("/analytics", analyticsRoutes);
 
 const PORT = process.env.PORT || 5005;
 

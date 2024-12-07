@@ -19,8 +19,8 @@ model menu_item {
   name                  String          @db.VarChar
   description           String?         @db.VarChar
   type_id               Int
-  created_at            DateTime        @default(now()) @db.Timetz(6)
-  updated_at            DateTime        @default(now()) @db.Timetz(6)
+  created_at            DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime        @default(now()) @db.Timestamptz(6)
   is_active             Boolean         @default(true)
   price_in_oere         Int
   comment               String?
@@ -39,19 +39,19 @@ model order {
   updated_at                        DateTime                            @default(now()) @db.Timestamptz(6)
   comment                           String?                             @db.VarChar
   status                            String                              @db.VarChar
+  total_price_in_oere               Int
   personel                          personel                            @relation(fields: [waiter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_items                       order_items[]
   tables_in_orders_and_reservations tables_in_orders_and_reservations[]
-  total_price_in_oere               Int                              
 }
 
 model order_items {
   id            Int       @id @default(autoincrement())
   order_id      Int
   menu_item_id  Int
-  quantity         Int       @default(1)
   comment       String?
   price_in_oere Int       @default(0)
+  quantity      Int       @default(1)
   menu_item     menu_item @relation(fields: [menu_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order         order     @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
@@ -92,8 +92,8 @@ model reservation {
 model role {
   id         Int        @id @default(autoincrement())
   name       String     @db.VarChar
-  created_at DateTime   @default(now()) @db.Timetz(6)
-  updated_at DateTime   @default(now()) @db.Timetz(6)
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at DateTime   @default(now()) @db.Timestamptz(6)
   personel   personel[]
 }
 
@@ -102,8 +102,8 @@ model tables_in_orders_and_reservations {
   order_id       Int?
   reservation_id Int?
   table_id       Int
-  created_at     DateTime     @default(now()) @db.Timetz(6)
-  updated_at     DateTime     @default(now()) @db.Timetz(6)
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime     @default(now()) @db.Timestamptz(6)
   order          order?       @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   reservation    reservation? @relation(fields: [reservation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cafe_table     cafe_table   @relation(fields: [table_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -119,8 +119,8 @@ model refresh_tokens {
 model menu_item_types {
   id         Int         @id(map: "order_item_type_pkey") @default(autoincrement())
   name       String      @db.VarChar
-  created_at DateTime    @default(now()) @db.Timetz(6)
-  updated_at DateTime    @default(now()) @db.Timetz(6)
+  created_at DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at DateTime    @default(now()) @db.Timestamptz(6)
   is_food    Boolean?
   menu_item  menu_item[]
 }

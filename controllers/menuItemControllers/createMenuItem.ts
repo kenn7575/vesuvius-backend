@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import createMenuItemSchema from "./createMenuItemSchema";
+import { upsertMenuItemSchema } from "../../zodSchemas/schemas";
 
 const prisma = new PrismaClient();
 
@@ -14,26 +14,28 @@ export async function createMenuItem(
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const parsedCreateMenuItemSchema = createMenuItemSchema.safeParse(req.body);
+  const result = upsertMenuItemSchema.safeParse(req.body);
 
-  if (!parsedCreateMenuItemSchema.success) {
-    return res
-      .status(400)
-      .json({ error: parsedCreateMenuItemSchema.error.flatten().fieldErrors });
+  if (!result.success) {
+    return res.status(400).json({ error: result.error.flatten().fieldErrors });
   }
 
-  const data = parsedCreateMenuItemSchema.data;
+  const data = result.data;
 
   try {
-    const menuItem = await prisma.menu_item.create({
+    const updatedMenuItem = await prisma.menu_item.create({
       data: {
         name: data.name,
         description: data.description,
-        price_in_oere: data.price_in_oere,
-        type_id: data.type_id,
+        price_in_oere: data.price * 100, // convert to øre
+        type_id: data.category,
+        is_active: data.is_active,
+        is_sold_out: data.is_sold_out,
+        is_lacking_ingredient: data.is_lacking_ingredient,
+        comment: data.comment,
       },
     });
-    res.status(201).json(menuItem);
+    res.json(updatedMenuItem);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");

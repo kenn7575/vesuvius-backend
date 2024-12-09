@@ -7,6 +7,7 @@ import getAllMenuItems from "../controllers/menuItemControllers/getAllMenuItems"
 import deactivateMenuItem from "../controllers/menuItemControllers/deactivateMenuItem";
 import activateMenuItem from "../controllers/menuItemControllers/activateMenuItem";
 import getAllMenuItemsAdmin from "../controllers/menuItemControllers/getAllMenuItemsAdmin";
+import getMenuItemsAdmin from "../controllers/menuItemControllers/getMenuItemAdmin";
 
 const router = express.Router();
 
@@ -14,8 +15,9 @@ const router = express.Router();
 // all routes in this file are prefixed with /menu_items
 
 router.get("/admin", authMiddleware, getAllMenuItemsAdmin); //get all for admins
+router.get("/admin/:id", authMiddleware, getMenuItemsAdmin); //get all for admins
 router.post("/", authMiddleware, createMenuItem); //create
-router.put("/:id", authMiddleware, updateMenuItem); //update specific
+router.put("/admin/:id", authMiddleware, updateMenuItem); //update specific
 router.delete("/:id/deactivate", authMiddleware, deactivateMenuItem); //delete specific
 router.get("/:id", getMenuItem); //get specific
 router.get("/", getAllMenuItems); //get all

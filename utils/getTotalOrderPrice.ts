@@ -8,7 +8,7 @@ async function getTotalOrderPrice(orderId: number) {
   });
 
   const totalPrice = items.reduce((total, item) => {
-    return total + item.price_in_oere * item.count;
+    return total + item.price_in_oere * item.quantity;
   }, 0);
 
   return totalPrice;

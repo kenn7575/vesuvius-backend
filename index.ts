@@ -1,4 +1,7 @@
 // server.js
+import "./instrument";
+import * as Sentry from "@sentry/node";
+
 import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
@@ -17,13 +20,13 @@ import analyticsRoutes from "./routes/analyticsRoutes";
 dotenv.config();
 
 const app = express();
+
 app.use(express.json());
 var corsOptions = {
   origin: ["http://localhost:3000", "http://localhost:3001"],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 app.use(cors(corsOptions));
-
 app.use("/auth/signin", limiter);
 app.use("/auth/signup", limiter);
 app.use("/auth", authRoutes);
@@ -38,6 +41,9 @@ app.use("/test", testRoutes);
 app.use("/analytics", analyticsRoutes);
 
 const PORT = process.env.PORT || 5005;
+// if (process.env.NODE_ENV === "production") {
+Sentry.setupExpressErrorHandler(app);
+// }
 
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);

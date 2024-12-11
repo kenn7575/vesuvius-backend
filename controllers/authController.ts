@@ -73,9 +73,11 @@ export async function signup(req: Request, res: Response): Promise<void | any> {
 // Sign-in function to authenticate a user and issue tokens
 export async function signin(req: Request, res: Response): Promise<void | any> {
   const { email, password } = req.body;
+  console.log("🚀 ~ signin ~ { email, password } :", { email, password });
   const audience = req.headers["audience"] as string;
+  const ip = req.socket?.remoteAddress;
 
-  if (!audience) {
+  if (!audience && !ip) {
     return res.status(400).json({ message: "Audience header is required" });
   }
 
@@ -114,8 +116,14 @@ export async function signin(req: Request, res: Response): Promise<void | any> {
   // Generate access and refresh tokens
   const refreshTokenRepository = new RefreshTokenRepositoryImpl(prisma);
   const tokenService = new TokenService(refreshTokenRepository);
-  const accessToken = await tokenService.generateAccessToken(user, audience);
-  const refreshToken = await tokenService.generateRefreshToken(user, audience);
+  const accessToken = await tokenService.generateAccessToken(
+    user,
+    audience ?? ip
+  );
+  const refreshToken = await tokenService.generateRefreshToken(
+    user,
+    audience ?? ip
+  );
 
   // Store the refresh token in the database
   const { password: _, ...userWithoutPassword } = user;
@@ -138,9 +146,13 @@ export async function refreshToken(
 
   // 1. get the refresh token and audience from the request
   const { token: encryptedToken } = req.body;
+  console.log("🚀 ~ encryptedToken:", encryptedToken);
   const audience = req.headers["audience"] as string;
+  console.log("🚀 ~ audience:", audience);
+  const ip = req.socket?.remoteAddress;
+  console.log("🚀 ~ ip:", ip);
 
-  if (!encryptedToken || !audience) {
+  if (!encryptedToken || (!audience && !ip)) {
     console.error("Invalid request. Missing token or audience in headers.");
     return res.status(400).json({
       message: "Invalid request. Missing token or audience in headers.",
@@ -157,8 +169,9 @@ export async function refreshToken(
   try {
     const token = await tokenService.validateRefreshToken(
       encryptedToken,
-      audience
+      audience ?? ip
     );
+    console.log("🚀 ~ token:", token);
 
     if (!token || !token.sub) {
       console.error("Invalid token");
@@ -182,7 +195,10 @@ export async function refreshToken(
     }
 
     // 4. Generate a new access token
-    const accessToken = await tokenService.generateAccessToken(user, audience);
+    const accessToken = await tokenService.generateAccessToken(
+      user,
+      audience ?? ip
+    );
     res.status(200).json({ accessToken });
   } catch (error) {
     // if anything goes wrong, return a 401 status

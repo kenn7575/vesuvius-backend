@@ -41,9 +41,9 @@ app.use("/test", testRoutes);
 app.use("/analytics", analyticsRoutes);
 
 const PORT = process.env.PORT || 5005;
-// if (process.env.NODE_ENV === "production") {
-Sentry.setupExpressErrorHandler(app);
-// }
+if (process.env.NODE_ENV === "production") {
+  Sentry.setupExpressErrorHandler(app);
+}
 
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);

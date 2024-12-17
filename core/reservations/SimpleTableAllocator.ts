@@ -1,5 +1,4 @@
-import { Table } from "./types";
-import { ITableAllocationStrategy } from "./ITableAllocationStrategy";
+import { Table, ITableAllocationStrategy } from "./types";
 
 // SimpleTableAllocator.ts
 

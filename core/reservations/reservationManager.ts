@@ -3,8 +3,8 @@ import {
   Table,
   DateSpecificOpeningHours,
   DayAvailability,
+  ITableAllocationStrategy,
 } from "./types";
-import { ITableAllocationStrategy } from "./ITableAllocationStrategy";
 import { OpeningHoursManager } from "./OpeningHoursManager";
 import { SimpleTableAllocator } from "./SimpleTableAllocator";
 import { TableManager } from "./tableManager";

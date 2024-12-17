@@ -31,3 +31,6 @@ export interface DateSpecificOpeningHours {
 export interface WeeklyOpeningHours {
   [day: string]: OpeningHours; // day can be 'Monday', 'Tuesday', etc.
 }
+export interface ITableAllocationStrategy {
+  allocateTables(partySize: number, availableTables: Table[]): number[] | null;
+}

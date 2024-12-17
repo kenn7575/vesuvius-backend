@@ -23,7 +23,7 @@ const createOrderSchema = z.object({
       })
     )
     .min(1),
-  order_tables: z
+  tables_in_orders_and_reservations: z
     .array(
       z.object({
         table_id: z.number(),
@@ -83,7 +83,7 @@ export async function createMenuItem(
           })),
         },
         tables_in_orders_and_reservations: {
-          create: data.order_tables.map((orderTable) => ({
+          create: data.tables_in_orders_and_reservations.map((orderTable) => ({
             table_id: orderTable.table_id,
           })),
         },
@@ -93,6 +93,9 @@ export async function createMenuItem(
         tables_in_orders_and_reservations: true,
       },
     });
+
+    // Rename `tables_in_orders_and_reservations` to `order_tables`
+
     console.log("🚀 ~ order:", order);
 
     res.status(200).json(order);

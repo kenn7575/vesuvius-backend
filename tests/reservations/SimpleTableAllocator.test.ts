@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Table } from "../../core/reservations/types";
-import { SimpleTableAllocator } from "../../core/reservations/reservations/SimpleTableAllocator";
+import { SimpleTableAllocator } from "../../core/reservations/SimpleTableAllocator";
 
 describe("SimpleTableAllocator", () => {
   const allocator = new SimpleTableAllocator();

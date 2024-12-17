@@ -1,8 +1,8 @@
 // ReservationManager.test.ts
 import { describe, it, expect, beforeEach } from "vitest";
-import { ReservationManager } from "../../core/reservations/reservations/ReservationManager";
+import { ReservationManager } from "../../core/reservations/ReservationManager";
 import { DateSpecificOpeningHours, Table } from "../../core/reservations/types";
-import { SimpleTableAllocator } from "../../core/reservations/reservations/SimpleTableAllocator";
+import { SimpleTableAllocator } from "../../core/reservations/SimpleTableAllocator";
 
 describe("ReservationManager", () => {
   let reservationManager: ReservationManager;

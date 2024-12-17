@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { TimeInterval } from "../../core/reservations/reservations/TimeInterval";
+import { TimeInterval } from "../../core/reservations/TimeInterval";
 
 describe("TimeInterval", () => {
   describe("isOverlapping", () => {

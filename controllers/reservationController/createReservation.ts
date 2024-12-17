@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { createReservationSchema } from "../../zodSchemas/schemas";
-import { ReservationManager } from "../../core/reservations/reservationManager";
+import { ReservationManager } from "../../core/reservations/ReservationManager";
 import convertOpeningHours from "../../utils/convertOpeningHours";
 
 const prisma = new PrismaClient();

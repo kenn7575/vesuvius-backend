@@ -1,5 +1,5 @@
 // TableManager.ts
-import { Table, Reservation } from "../types";
+import { Table, Reservation } from "./types";
 import { TimeInterval } from "./TimeInterval";
 
 export class TableManager {

@@ -1,6 +1,6 @@
 // OpeningHoursManager.test.ts
 import { describe, it, expect } from "vitest";
-import { OpeningHoursManager } from "../../core/reservations/reservations/OpeningHoursManager";
+import { OpeningHoursManager } from "../../core/reservations/OpeningHoursManager";
 import { DateSpecificOpeningHours } from "../../core/reservations/types";
 
 describe("OpeningHoursManager", () => {

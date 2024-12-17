@@ -1,4 +1,4 @@
-import { OpeningHours, DateSpecificOpeningHours } from "../types";
+import { OpeningHours, DateSpecificOpeningHours } from "./types";
 
 export class OpeningHoursManager {
   private openingHoursByDate: Map<string, OpeningHours>;

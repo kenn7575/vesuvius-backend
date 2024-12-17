@@ -4,7 +4,7 @@ import {
   getHourlyReservationAvailabilitySchema,
   getReservationAvailabilityInRangeSchema,
 } from "../../zodSchemas/schemas";
-import { ReservationManager } from "../../core/reservations/reservationManager";
+import { ReservationManager } from "../../core/reservations/ReservationManager";
 import convertOpeningHours from "../../utils/convertOpeningHours";
 const prisma = new PrismaClient();
 

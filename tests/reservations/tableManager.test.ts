@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Reservation, Table } from "../../core/reservations/types";
-import { TableManager } from "../../core/reservations/reservations/tableManager";
+import { TableManager } from "../../core/reservations/tableManager";
 
 describe("TableManager", () => {
   const tables: Table[] = [
